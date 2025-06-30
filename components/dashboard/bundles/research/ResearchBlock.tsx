@@ -32,21 +32,21 @@ const iconMap: Record<string, JSX.Element> = {
 
 export function ResearchBlock({ block, index, onUpdate, onDelete, onRegenerate }: ResearchBlockProps) {
   // Use specialized Bio block for bio type
-  if (block.type === 'bio') {
-    return <BioResearchBlock block={block} index={index} onUpdate={onUpdate} onDelete={onDelete} onRegenerate={onRegenerate} />;
-  }
-
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([]);
   const [showPromptSelector, setShowPromptSelector] = useState(false);
-  
-  const template = getTemplateByType(block.type);
-  if (!template) return null;
 
   useEffect(() => {
     setPromptTemplates(getPromptTemplates());
   }, []);
+
+  if (block.type === 'bio') {
+    return <BioResearchBlock block={block} index={index} onUpdate={onUpdate} onDelete={onDelete} onRegenerate={onRegenerate} />;
+  }
+  
+  const template = getTemplateByType(block.type);
+  if (!template) return null;
 
   const getStatusColor = () => {
     switch (block.research.status) {

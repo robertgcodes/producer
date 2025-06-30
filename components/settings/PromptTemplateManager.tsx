@@ -370,8 +370,6 @@ export function PromptTemplateManager({ onClose }: PromptTemplateManagerProps) {
               {researchBlockTemplates.map(template => {
                 const hasCustomDefault = defaultPrompts[template.type];
                 const currentPrompt = defaultPrompts[template.type] || template.defaultPrompt;
-                const [isEditing, setIsEditing] = useState(false);
-                const [tempPrompt, setTempPrompt] = useState(currentPrompt);
 
                 return (
                   <div key={template.type} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
@@ -390,63 +388,20 @@ export function PromptTemplateManager({ onClose }: PromptTemplateManagerProps) {
                             Customized
                           </span>
                         )}
-                        {!isEditing ? (
-                          <>
-                            <button
-                              onClick={() => {
-                                setIsEditing(true);
-                                setTempPrompt(currentPrompt);
-                              }}
-                              className="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-                            >
-                              Edit
-                            </button>
-                            {hasCustomDefault && (
-                              <button
-                                onClick={() => handleResetDefaultPrompt(template.type)}
-                                className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                              >
-                                Reset
-                              </button>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => {
-                                handleUpdateDefaultPrompt(template.type, tempPrompt);
-                                setIsEditing(false);
-                                toast.success('Default prompt updated');
-                              }}
-                              className="text-sm text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => {
-                                setIsEditing(false);
-                                setTempPrompt(currentPrompt);
-                              }}
-                              className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                            >
-                              Cancel
-                            </button>
-                          </>
+                        {hasCustomDefault && (
+                          <button
+                            onClick={() => handleResetDefaultPrompt(template.type)}
+                            className="text-sm text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                          >
+                            Reset to Default
+                          </button>
                         )}
                       </div>
                     </div>
                     
-                    {isEditing ? (
-                      <textarea
-                        value={tempPrompt}
-                        onChange={(e) => setTempPrompt(e.target.value)}
-                        className="w-full h-40 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 font-mono text-sm text-gray-900 dark:text-white"
-                      />
-                    ) : (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 italic line-clamp-3">
-                        {currentPrompt}
-                      </p>
-                    )}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 italic line-clamp-3">
+                      {currentPrompt}
+                    </p>
                   </div>
                 );
               })}
