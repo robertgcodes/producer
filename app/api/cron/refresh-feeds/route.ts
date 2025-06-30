@@ -117,7 +117,7 @@ export async function GET(request: Request) {
         results.errors.push({
           feedId: 'batch',
           feedName: 'Batch Refresh',
-          error: error.message
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }
