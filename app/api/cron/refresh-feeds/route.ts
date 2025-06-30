@@ -47,10 +47,16 @@ export async function GET(request: Request) {
 
     // Get all RSS feeds from the database
     const feedsSnapshot = await getDocs(collection(db, 'rssFeeds'));
-    const allFeeds = feedsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const allFeeds = feedsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title || '',
+        type: data.type || 'rss',
+        lastRefreshed: data.lastRefreshed,
+        ...data
+      };
+    });
 
     // Filter out Twitter/X feeds and inactive feeds
     const feedsToRefresh = allFeeds.filter(feed => {
