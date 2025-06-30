@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
-import { Bundle, ContentItem } from '@/types';
+import { Bundle, ContentItem, Project } from '@/types';
 import { InspirationView } from '@/components/dashboard/InspirationView';
 
 export default function InspirationPage() {
@@ -24,7 +24,7 @@ export default function InspirationPage() {
       const projectsList = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })) as Project[];
       
       // Sort projects by createdAt in descending order
       projectsList.sort((a, b) => {
