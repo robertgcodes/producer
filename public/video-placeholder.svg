@@ -1,0 +1,8 @@
+<svg width="400" height="225" viewBox="0 0 400 225" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="225" fill="#1a1a1a"/>
+  <g transform="translate(200, 112.5)">
+    <rect x="-40" y="-30" width="80" height="60" rx="8" fill="#333" stroke="#555" stroke-width="2"/>
+    <polygon points="-15,-15 -15,15 20,0" fill="#666"/>
+  </g>
+  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Video</text>
+</svg>

@@ -1,0 +1,89 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "bundleFiles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "bundleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "feedItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "feedId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "pubDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "storyChunks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "bundleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "chunkIndex",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "feedStories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "feedId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "pubDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "feedStories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "feedType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "pubDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bundleVideos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "bundleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
