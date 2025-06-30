@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       totalFeeds: 0,
       refreshedFeeds: 0,
       skippedFeeds: 0,
-      errors: [],
+      errors: [] as Array<{ feedId?: string; feedName?: string; title?: string; error: string }>,
       bundleStories: {
         total: 0,
         refreshed: 0
@@ -96,7 +96,10 @@ export async function GET(request: Request) {
         );
         
         results.refreshedFeeds = refreshResult.successCount;
-        results.errors = refreshResult.failedFeeds;
+        results.errors = refreshResult.failedFeeds.map(f => ({
+          title: f.title,
+          error: f.error
+        }));
         
         // Update lastRefreshed timestamps for successful feeds
         const successfulFeedIds = feedIds.filter((id, index) => {
