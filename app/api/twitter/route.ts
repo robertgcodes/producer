@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { TwitterApi } from 'twitter-api-v2';
 
 // Twitter API v2 client
