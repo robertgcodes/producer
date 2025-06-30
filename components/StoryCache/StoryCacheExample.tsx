@@ -56,16 +56,9 @@ export function StoryCacheExample({
           )}
           
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span>{story.source.name}</span>
-            <span>{new Date(story.publishedAt).toLocaleDateString()}</span>
-            {story.source.credibility && (
-              <span className={`px-2 py-1 rounded text-xs ${
-                story.source.credibility === 'high' ? 'bg-green-100 text-green-800' :
-                story.source.credibility === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {story.source.credibility}
-              </span>
+            <span>{story.sourceName}</span>
+            {story.publishedAt && (
+              <span>{new Date(story.publishedAt).toLocaleDateString()}</span>
             )}
           </div>
 
