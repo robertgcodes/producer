@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Bundle, ContentItem, BundleFile } from '@/types';
 import { HomeTab } from './tabs/HomeTab';
 import { StoriesTab } from './tabs/StoriesTab';
@@ -26,7 +26,7 @@ type TabId = 'home' | 'stories' | 'assets' | 'files' | 'images' | 'videos' | 'op
 interface Tab {
   id: TabId;
   label: string;
-  icon: JSX.Element;
+  icon: ReactElement;
 }
 
 const tabs: Tab[] = [
