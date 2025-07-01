@@ -30,6 +30,7 @@ export interface Bundle {
   order: number;
   createdAt: Date;
   updatedAt: Date;
+  lastRefreshed?: Date; // When stories were last refreshed from feeds
   // New fields for enhanced features
   notes?: string; // User notes for the bundle
   aiBrief?: string; // AI-generated brief

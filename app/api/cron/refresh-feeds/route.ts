@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { FeedRefreshService } from '@/lib/services/feedRefreshService';
+import { BundleSearchService } from '@/lib/services/bundleSearchService';
 import { 
   collection, 
   query, 
@@ -122,11 +123,53 @@ export async function GET(request: Request) {
       }
     }
 
-    // Bundle stories are automatically refreshed when their source feeds are refreshed
-    // The FeedRefreshService handles updating stories from RSS feeds
-    console.log('[Cron] Bundle stories will be updated as part of feed refresh');
-    results.bundleStories.total = results.refreshedFeeds;
-    results.bundleStories.refreshed = results.refreshedFeeds;
+    // Refresh bundle stories from the indexed feed items
+    console.log('[Cron] Refreshing bundle stories from indexed feed items...');
+    
+    try {
+      // Get all bundles
+      const bundlesSnapshot = await getDocs(collection(db, 'bundles'));
+      results.bundleStories.total = bundlesSnapshot.size;
+      
+      console.log(`[Cron] Found ${bundlesSnapshot.size} bundles to refresh`);
+      
+      // Refresh stories for each bundle
+      let bundleRefreshCount = 0;
+      for (const bundleDoc of bundlesSnapshot.docs) {
+        try {
+          const bundleId = bundleDoc.id;
+          const bundleTitle = bundleDoc.data().title || 'Untitled';
+          
+          console.log(`[Cron] Refreshing stories for bundle: ${bundleTitle}`);
+          await BundleSearchService.refreshBundleStoriesFromIndex(bundleId);
+          
+          // Update the bundle's lastRefreshed timestamp
+          await updateDoc(doc(db, 'bundles', bundleId), {
+            lastRefreshed: Timestamp.now()
+          });
+          
+          bundleRefreshCount++;
+        } catch (error) {
+          console.error(`[Cron] Error refreshing bundle ${bundleDoc.id}:`, error);
+          results.errors.push({
+            feedId: bundleDoc.id,
+            feedName: bundleDoc.data().title || 'Unknown bundle',
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      }
+      
+      results.bundleStories.refreshed = bundleRefreshCount;
+      console.log(`[Cron] Successfully refreshed ${bundleRefreshCount} bundles`);
+      
+    } catch (error) {
+      console.error('[Cron] Error refreshing bundle stories:', error);
+      results.errors.push({
+        feedId: 'bundles',
+        feedName: 'Bundle Refresh',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
 
     const duration = Date.now() - startTime;
     console.log(`[Cron] Feed refresh completed in ${duration}ms`);

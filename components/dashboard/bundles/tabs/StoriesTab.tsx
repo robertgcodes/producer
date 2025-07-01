@@ -96,6 +96,14 @@ export function StoriesTab({ bundle, stories, onAddStory, onRemoveStory }: Stori
       // Refresh stories from the indexed feed items (doesn't refresh feeds themselves)
       const stories = await BundleSearchService.refreshBundleStoriesFromIndex(bundle.id);
       setSuggestedStories(stories);
+      
+      // Update the bundle's lastRefreshed timestamp
+      const { updateDoc, doc, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      await updateDoc(doc(db, 'bundles', bundle.id), {
+        lastRefreshed: serverTimestamp()
+      });
+      
       toast.success('Stories refreshed');
     } catch (error) {
       console.error('Error loading suggestions:', error);
@@ -337,28 +345,35 @@ export function StoriesTab({ bundle, stories, onAddStory, onRemoveStory }: Stori
             </button>
             
             {activeTab === 'all' && (
-              <button
-                onClick={refreshStories}
-                disabled={isLoadingSuggestions}
-                className="ml-auto text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-              >
-                {isLoadingSuggestions ? (
-                  <div className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span className="text-xs">Searching feeds...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span>Refresh from feeds</span>
+              <div className="ml-auto flex items-center gap-4">
+                {bundle.lastRefreshed && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Last refresh: {formatDate(bundle.lastRefreshed)}
                   </div>
                 )}
-              </button>
+                <button
+                  onClick={refreshStories}
+                  disabled={isLoadingSuggestions}
+                  className="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                >
+                  {isLoadingSuggestions ? (
+                    <div className="flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-xs">Searching feeds...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Refresh from feeds</span>
+                    </div>
+                  )}
+                </button>
+              </div>
             )}
           </div>
 

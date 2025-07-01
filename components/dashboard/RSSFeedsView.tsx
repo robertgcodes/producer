@@ -23,6 +23,7 @@ interface RSSFeed {
   category?: string;
   order: number;
   lastFetched?: Date;
+  lastRefreshed?: any; // Date or Firestore Timestamp from cron job
   items?: RSSItem[];
   type?: 'rss' | 'twitter' | 'youtube' | 'googlenews';
   twitterUsername?: string;
@@ -1445,6 +1446,40 @@ export function RSSFeedsView() {
             </button>
           </div>
         </div>
+        
+        {/* Last Refresh Info and Progress Bar */}
+        {(lastAutoRefresh || isRefreshing) && (
+          <div className="mt-4">
+            {isRefreshing && refreshProgress && (
+              <div className="mb-2">
+                <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  <span>Refreshing feeds...</span>
+                  <span>{refreshProgress.current} / {refreshProgress.total}</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${(refreshProgress.current / refreshProgress.total) * 100}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            {lastAutoRefresh && (
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="inline-flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Last automatic refresh: {formatDate(lastAutoRefresh, 'time')}
+                  {' • '}
+                  <span className="text-xs">
+                    (Auto-refreshes every 30 minutes via Vercel)
+                  </span>
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {feeds.length === 0 ? (
           <div className="bg-white dark:bg-gray-900 rounded-xl p-12 text-center">
