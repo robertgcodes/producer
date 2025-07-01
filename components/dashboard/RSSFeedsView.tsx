@@ -270,6 +270,7 @@ export function RSSFeedsView() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshProgress, setRefreshProgress] = useState<{ current: number; total: number } | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastAutoRefresh, setLastAutoRefresh] = useState<Date | null>(null);
 
   // Auto-refresh feeds every 30 minutes - disabled on initial load to prevent quota issues
   // useAutoRefreshFeeds(true, 30);
@@ -301,6 +302,18 @@ export function RSSFeedsView() {
       } as RSSFeed));
       
       setFeeds(feedsList);
+      
+      // Find the most recent lastRefreshed time
+      let mostRecentRefresh: Date | null = null;
+      feedsList.forEach(feed => {
+        if (feed.lastRefreshed) {
+          const refreshDate = feed.lastRefreshed instanceof Date ? feed.lastRefreshed : feed.lastRefreshed.toDate();
+          if (!mostRecentRefresh || refreshDate > mostRecentRefresh) {
+            mostRecentRefresh = refreshDate;
+          }
+        }
+      });
+      setLastAutoRefresh(mostRecentRefresh);
     });
 
     return () => unsubscribe();
@@ -1403,23 +1416,46 @@ export function RSSFeedsView() {
                 </div>
                 <button
                   onClick={async () => {
+                    setIsRefreshing(true);
+                    setRefreshProgress({ current: 0, total: feeds.length });
                     toast.info('Refreshing all feeds...');
                     try {
-                      const result = await FeedRefreshService.refreshAllFeeds(true);
+                      const result = await FeedRefreshService.refreshAllFeeds(
+                        true,
+                        (current, total) => {
+                          setRefreshProgress({ current, total });
+                        }
+                      );
                       toast.success(`Refreshed ${result.successCount} feeds`);
                       if (result.failedCount > 0) {
                         toast.error(`${result.failedCount} feeds failed to refresh`);
                       }
                     } catch (error) {
                       toast.error('Failed to refresh feeds');
+                    } finally {
+                      setIsRefreshing(false);
+                      setRefreshProgress(null);
                     }
                   }}
                   className="btn-secondary flex items-center gap-2"
+                  disabled={isRefreshing}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Refresh All
+                  {isRefreshing ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {refreshProgress ? `${refreshProgress.current}/${refreshProgress.total}` : 'Refreshing'}
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Refresh All
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={() => {
