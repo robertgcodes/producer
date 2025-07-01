@@ -300,7 +300,7 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                         {/* Current title display */}
                         <div className="mb-3">
                           <p className="text-lg font-medium text-gray-900 dark:text-white leading-snug">
-                            {generatedContent[model.id].titles[currentTitleIndex[model.id] || 0]}
+                            {generatedContent[model.id]?.titles?.[currentTitleIndex[model.id] || 0] || ''}
                           </p>
                         </div>
                         
@@ -310,7 +310,8 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                             <button
                               onClick={() => {
                                 const current = currentTitleIndex[model.id] || 0;
-                                const newIndex = current > 0 ? current - 1 : generatedContent[model.id].titles.length - 1;
+                                const titlesLength = generatedContent[model.id]?.titles?.length || 0;
+                                const newIndex = current > 0 ? current - 1 : Math.max(0, titlesLength - 1);
                                 setCurrentTitleIndex(prev => ({ ...prev, [model.id]: newIndex }));
                               }}
                               className="p-1.5 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
@@ -322,13 +323,14 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                             </button>
                             
                             <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
-                              {(currentTitleIndex[model.id] || 0) + 1} / {generatedContent[model.id].titles.length}
+                              {(currentTitleIndex[model.id] || 0) + 1} / {generatedContent[model.id]?.titles?.length || 0}
                             </span>
                             
                             <button
                               onClick={() => {
                                 const current = currentTitleIndex[model.id] || 0;
-                                const next = (current + 1) % generatedContent[model.id].titles.length;
+                                const titlesLength = generatedContent[model.id]?.titles?.length || 1;
+                                const next = (current + 1) % titlesLength;
                                 setCurrentTitleIndex(prev => ({ ...prev, [model.id]: next }));
                               }}
                               className="p-1.5 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
@@ -341,7 +343,7 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                           </div>
                           
                           <button
-                            onClick={() => copyToClipboard(generatedContent[model.id].titles[currentTitleIndex[model.id] || 0])}
+                            onClick={() => copyToClipboard(generatedContent[model.id]?.titles?.[currentTitleIndex[model.id] || 0] || '')}
                             className="p-1.5 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                             title="Copy to clipboard"
                           >
@@ -366,11 +368,11 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
-                          {expandedTitles[model.id] ? 'Hide' : 'Show'} all {generatedContent[model.id].titles.length} titles
+                          {expandedTitles[model.id] ? 'Hide' : 'Show'} all {generatedContent[model.id]?.titles?.length || 0} titles
                         </button>
                         {expandedTitles[model.id] && (
                           <div className="mt-2 max-h-48 overflow-y-auto space-y-2 border dark:border-gray-700 rounded-lg p-2">
-                            {generatedContent[model.id].titles.map((title: string, idx: number) => (
+                            {generatedContent[model.id]?.titles?.map((title: string, idx: number) => (
                               <div
                                 key={idx}
                                 onClick={() => {
