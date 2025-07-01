@@ -1420,8 +1420,10 @@ export function RSSFeedsView() {
                     setRefreshProgress({ current: 0, total: feeds.length });
                     toast.info('Refreshing all feeds...');
                     try {
-                      const result = await FeedRefreshService.refreshAllFeeds(
-                        true,
+                      // Use refreshSpecificFeeds with all feed IDs to get progress updates
+                      const feedIds = feeds.map(f => f.id);
+                      const result = await FeedRefreshService.refreshSpecificFeeds(
+                        feedIds,
                         (current, total) => {
                           setRefreshProgress({ current, total });
                         }
