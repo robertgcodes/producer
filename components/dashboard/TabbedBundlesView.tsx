@@ -1032,7 +1032,7 @@ export function TabbedBundlesView({
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     AI Research
                   </h3>
-                  {!showAIResults && (
+                  {!showAIResults && activeBundle && (
                     <button
                       onClick={() => loadAIResults(activeBundle)}
                       className="text-xs px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
