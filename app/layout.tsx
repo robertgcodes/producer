@@ -13,8 +13,16 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Story Bundler - Livestream Show Producer",
-  description: "Organize news stories into segments for your livestream",
+  title: "Watcher Pro - AI-Powered Show Production Tool",
+  description: "Watch Everything. Miss Nothing. The AI-powered show production tool for livestreamers.",
+  keywords: ["livestream", "news analysis", "show production", "content creation", "watching the watchers"],
+  openGraph: {
+    title: "Watcher Pro",
+    description: "AI-powered show production tool for livestreamers",
+    url: "https://watcherpro.ai",
+    siteName: "Watcher Pro",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

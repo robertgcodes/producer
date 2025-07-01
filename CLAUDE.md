@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Story Bundler** is a news aggregation and show production tool for livestreamers. It helps organize news stories into segments by bundling related content (articles, videos, tweets) together for easy show preparation.
+**Watcher Pro** is an AI-powered show production tool for livestreamers, designed for "Watching the Watchers" and similar news analysis shows. It helps organize news stories into segments by bundling related content (articles, videos, tweets) together for easy show preparation.
 
 ## Current State
 
@@ -372,7 +372,7 @@ Open your terminal and use Claude Code like this:
 
 bash
 # Start a new project
-claude-code "Create a new Next.js project called 'story-bundler' with the following requirements: [paste our technical specs]"
+claude-code "Create a new Next.js project called 'watcher-pro' with the following requirements: [paste our technical specs]"
 
 # Or work iteratively
 claude-code "I want to build a news story bundling app for livestreamers. Let's start with the database schema and basic Next.js setup. Here are the requirements: [paste relevant sections]"

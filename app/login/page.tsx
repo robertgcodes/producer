@@ -98,58 +98,70 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950" suppressHydrationWarning>
       {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 p-12 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-700 to-purple-900 p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-72 h-72 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/2 translate-y-1/2"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
         </div>
         
         <div className="relative z-10">
-          <h2 className="text-4xl font-bold text-white mb-3">Story Bundler</h2>
-          <p className="text-brand-100 text-lg font-medium">Professional news research for livestreamers</p>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-4xl font-bold text-white">Watcher Pro</h2>
+              <p className="text-blue-100">Beta Access</p>
+            </div>
+          </div>
+          <p className="text-blue-100 text-lg font-medium max-w-md">The AI-powered show production tool for "Watching the Watchers" and other news analysis livestreams</p>
         </div>
         
         <div className="space-y-8 relative z-10">
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
+          <div className="feature-card bg-white/10 backdrop-blur-sm rounded-xl p-4 flex gap-4">
+            <div className="feature-icon bg-white/20 rounded-lg p-2">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1.5 text-lg">Organize Stories</h3>
-              <p className="text-brand-100 text-sm leading-relaxed">Bundle related news into powerful segments for your show</p>
+              <h3 className="text-white font-semibold mb-1.5 text-lg">Smart Story Bundling</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">AI groups related stories across all your sources automatically</p>
             </div>
           </div>
           
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <div className="feature-card bg-white/10 backdrop-blur-sm rounded-xl p-4 flex gap-4">
+            <div className="feature-icon bg-white/20 rounded-lg p-2">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
               </svg>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1.5 text-lg">Track Performance</h3>
-              <p className="text-brand-100 text-sm leading-relaxed">Monitor what resonates with your audience</p>
+              <h3 className="text-white font-semibold mb-1.5 text-lg">Multi-Source Feeds</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">RSS, YouTube, Twitter/X, and Google News in one dashboard</p>
             </div>
           </div>
           
-          <div className="feature-card">
-            <div className="feature-icon">
-              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <div className="feature-card bg-white/10 backdrop-blur-sm rounded-xl p-4 flex gap-4">
+            <div className="feature-icon bg-white/20 rounded-lg p-2">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" suppressHydrationWarning>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1.5 text-lg">AI-Powered</h3>
-              <p className="text-brand-100 text-sm leading-relaxed">Smart suggestions and insights coming soon</p>
+              <h3 className="text-white font-semibold mb-1.5 text-lg">Research Assistant</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">Deep-dive research on people, organizations, and stories</p>
             </div>
           </div>
         </div>
         
-        <p className="text-brand-100 text-sm relative z-10">
-          © 2024 Story Bundler. Built for content creators.
+        <p className="text-blue-100 text-sm relative z-10">
+          © 2024 WatcherPro.ai • Made for livestreamers who never miss a story
         </p>
       </div>
       
