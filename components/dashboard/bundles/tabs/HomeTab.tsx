@@ -23,6 +23,10 @@ interface RSSFeed {
   feedTitle?: string;
   lastFetched?: Date;
   items?: any[];
+  twitterUsername?: string;
+  youtubeChannelId?: string;
+  youtubeUrl?: string;
+  googleNewsQuery?: string;
 }
 
 // Icon options for bundles
