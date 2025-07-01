@@ -221,6 +221,13 @@ export class FirestoreStoryCacheService {
         status: 'active',
         createdAt: new Date(),
         updatedAt: new Date(),
+        metadata: {
+          totalStoryCount: stories.length,
+          chunkCount: chunks.length,
+          searchTerms: searchTerms || [],
+          selectedFeedIds: selectedFeedIds || [],
+          cacheVersion: 1
+        },
         summary: cleanFirestoreData(summary),
         settings: {
           maxAgeHours: this.DEFAULT_MAX_AGE_HOURS,

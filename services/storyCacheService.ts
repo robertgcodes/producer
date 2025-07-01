@@ -112,7 +112,7 @@ export class StoryCacheService {
     const cacheRef = doc(db, CACHE_COLLECTIONS.CACHE_DOCS, bundleId);
     
     // Deduplicate stories
-    const uniqueStories = this.deduplicateStories(stories, cache.settings.deduplicationMethod);
+    const uniqueStories = this.deduplicateStories(stories, config.deduplication || 'url');
     
     // Split into chunks
     const chunks = this.createStoryChunks(uniqueStories);
@@ -309,9 +309,6 @@ export class StoryCacheService {
       
       if (!seen.has(key)) {
         seen.set(key, story);
-      } else {
-        // Mark as duplicate
-        story.duplicateOf = seen.get(key)!.id;
       }
     }
     
@@ -331,7 +328,7 @@ export class StoryCacheService {
       
       if (
         currentChunk.length >= STORY_CACHE_CONSTANTS.MAX_CHUNK_SIZE ||
-        currentSize + storySize > STORY_CACHE_CONSTANTS.MAX_CHUNK_SIZE_BYTES
+        currentSize + storySize > STORY_CACHE_CONSTANTS.CHUNK_SIZE_LIMIT
       ) {
         chunks.push(currentChunk);
         currentChunk = [];
@@ -411,7 +408,8 @@ export class StoryCacheService {
     // Date index
     const dateIndex: StoryIndex = {
       id: 'byDate',
-      type: 'date',
+      bundleId,
+      indexType: 'date',
       entries: [],
       updatedAt: new Date(),
     };
@@ -419,7 +417,8 @@ export class StoryCacheService {
     // Source index
     const sourceIndex: StoryIndex = {
       id: 'bySource',
-      type: 'source',
+      bundleId,
+      indexType: 'source',
       entries: [],
       updatedAt: new Date(),
     };
@@ -431,7 +430,7 @@ export class StoryCacheService {
     chunks.forEach((chunk, chunkIndex) => {
       chunk.forEach((story) => {
         // Date index (by day)
-        const dateKey = new Date(story.publishedAt).toISOString().split('T')[0];
+        const dateKey = story.publishedAt ? new Date(story.publishedAt).toISOString().split('T')[0] : 'unknown';
         if (!dateMap.has(dateKey)) {
           dateMap.set(dateKey, { storyIds: [], chunkIds: new Set() });
         }
@@ -439,11 +438,12 @@ export class StoryCacheService {
         dateMap.get(dateKey)!.chunkIds.add(`chunk_${chunkIndex}`);
 
         // Source index
-        if (!sourceMap.has(story.source.name)) {
-          sourceMap.set(story.source.name, { storyIds: [], chunkIds: new Set() });
+        const sourceName = story.source?.name || 'Unknown';
+        if (!sourceMap.has(sourceName)) {
+          sourceMap.set(sourceName, { storyIds: [], chunkIds: new Set() });
         }
-        sourceMap.get(story.source.name)!.storyIds.push(story.id);
-        sourceMap.get(story.source.name)!.chunkIds.add(`chunk_${chunkIndex}`);
+        sourceMap.get(sourceName)!.storyIds.push(story.id);
+        sourceMap.get(sourceName)!.chunkIds.add(`chunk_${chunkIndex}`);
       });
     });
 
