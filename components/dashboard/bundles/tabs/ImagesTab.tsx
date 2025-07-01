@@ -64,7 +64,10 @@ export function ImagesTab({ bundle, stories }: ImagesTabProps) {
     setIsLoading(prev => new Map(prev).set(entity.id, true));
     
     try {
-      const images = await ImageSearchService.searchImages(entity.name, entity.type);
+      const images = await ImageSearchService.searchImages(entity.name, {
+        imageType: entity.type === 'person' ? 'Person' : undefined,
+        count: 20
+      });
       setEntityImages(prev => new Map(prev).set(entity.id, images));
       toast.success(`Found ${images.length} images for ${entity.name}`);
     } catch (error) {
