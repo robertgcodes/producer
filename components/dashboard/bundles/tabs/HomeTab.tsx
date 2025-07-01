@@ -644,7 +644,8 @@ export function HomeTab({ bundle, stories, onUpdateBundle, onDeleteBundle }: Hom
                               if (!feed.lastFetched) return 'Never';
                               try {
                                 // Handle Firestore Timestamp
-                                const date = feed.lastFetched.toDate ? feed.lastFetched.toDate() : new Date(feed.lastFetched);
+                                const feedDate = feed.lastFetched as any;
+                                const date = feedDate.toDate ? feedDate.toDate() : new Date(feedDate);
                                 return date.toLocaleDateString();
                               } catch (e) {
                                 return 'Never';
