@@ -15,6 +15,7 @@ export interface Project {
 export interface Bundle {
   id: string;
   projectId: string;
+  userId: string;
   parentId?: string; // For nested bundles
   title: string;
   description?: string; // Additional guidance for content discovery
