@@ -10,12 +10,14 @@ import { toast } from 'sonner';
 import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
 import { activityLog } from '@/lib/services/activityLogService';
 import { RemovedStoriesService } from '@/lib/services/removedStoriesService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface BundleDashboardProps {
   activeProject: Project;
 }
 
 export function BundleDashboard({ activeProject }: BundleDashboardProps) {
+  const { user } = useAuth();
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [bundleStories, setBundleStories] = useState<Record<string, ContentItem[]>>({});
   const [bundleFiles, setBundleFiles] = useState<Record<string, BundleFile[]>>({});
@@ -28,11 +30,12 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
 
   // Load bundles
   useEffect(() => {
-    if (!activeProject?.id) return;
+    if (!activeProject?.id || !user) return;
 
     const bundlesQuery = query(
       collection(db, 'bundles'),
       where('projectId', '==', activeProject.id),
+      where('userId', '==', user.uid),
       orderBy('order', 'asc')
     );
 
@@ -69,7 +72,7 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
     });
 
     return () => unsubscribe();
-  }, [activeProject?.id]);
+  }, [activeProject?.id, user]);
 
   // Load stories and files for bundles
   useEffect(() => {
@@ -153,6 +156,8 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
 
   const handleCreateBundle = async () => {
     console.log('handleCreateBundle called');
+    if (!user) return;
+    
     const title = prompt('Enter bundle title:');
     if (!title) return;
     
@@ -162,6 +167,7 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
       console.log('Creating bundle with projectId:', activeProject.id);
       const bundleData = {
         projectId: activeProject.id,
+        userId: user.uid,
         title,
         description: description || '',
         theme: 'general',
@@ -185,6 +191,8 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
   };
 
   const handleCreateChildBundle = async (parentId: string) => {
+    if (!user) return;
+    
     const title = prompt('Enter sub-bundle title:');
     if (!title) return;
     
@@ -194,6 +202,7 @@ export function BundleDashboard({ activeProject }: BundleDashboardProps) {
       const parentBundle = bundles.find(b => b.id === parentId);
       const bundleData = {
         projectId: activeProject.id,
+        userId: user.uid,
         parentId,
         title,
         description: description || '',

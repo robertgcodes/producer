@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy, writeBatch, getDocs } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, updateDoc, doc, deleteDoc, query, orderBy, writeBatch, getDocs, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { RSSService } from '@/lib/services/rssService';
 import { TwitterService } from '@/lib/services/twitterService';
@@ -14,6 +14,7 @@ import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import { OPMLService } from '@/lib/services/opmlService';
 import { FeedHealthService } from '@/lib/services/feedHealthService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RSSFeed {
   id: string;
@@ -234,6 +235,7 @@ function RSSFeedBlock({ feed, onDelete, onRefresh, onEdit }: RSSFeedBlockProps) 
 }
 
 export function RSSFeedsView() {
+  const { user } = useAuth();
   const [feeds, setFeeds] = useState<RSSFeed[]>([]);
   const [showAddFeed, setShowAddFeed] = useState(false);
   const [feedUrl, setFeedUrl] = useState('');
@@ -286,8 +288,10 @@ export function RSSFeedsView() {
 
   // Fetch RSS feeds from Firestore
   useEffect(() => {
+    if (!user) return;
+    
     const feedsRef = collection(db, 'rssFeeds');
-    const q = query(feedsRef, orderBy('order', 'asc'));
+    const q = query(feedsRef, where('userId', '==', user.uid), orderBy('order', 'asc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const feedsList = snapshot.docs.map(doc => ({
@@ -299,7 +303,7 @@ export function RSSFeedsView() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   // Sample RSS feeds for quick setup
   const sampleFeeds = [
@@ -325,6 +329,7 @@ export function RSSFeedsView() {
   const handleAddFeed = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!user) return;
     if (feedType === 'rss' && (!feedUrl.trim() || !feedTitle.trim())) return;
     if (feedType === 'twitter' && (!twitterUsername.trim() || !feedTitle.trim())) return;
     if (feedType === 'youtube' && (!youtubeUrl.trim() || !feedTitle.trim())) return;
@@ -340,6 +345,7 @@ export function RSSFeedsView() {
         const feedDoc = {
           title: feedTitle,
           url: feedUrl,
+          userId: user.uid,
           category: feedCategory || 'General',
           order: feeds.length,
           lastFetched: new Date(),
@@ -372,6 +378,7 @@ export function RSSFeedsView() {
         const feedDoc = {
           title: feedTitle,
           url: `https://twitter.com/${username}`,
+          userId: user.uid,
           twitterUsername: username,
           category: feedCategory || 'Social',
           order: feeds.length,
@@ -396,6 +403,7 @@ export function RSSFeedsView() {
           const feedDoc = {
             title: feedTitle,
             url: ytFeedUrl,
+            userId: user.uid,
             youtubeUrl: youtubeUrl,
             category: feedCategory || 'Video',
             order: feeds.length,
@@ -427,6 +435,7 @@ export function RSSFeedsView() {
           const feedDoc = {
             title: feedTitle,
             url: GoogleNewsService.buildGoogleNewsUrl(googleNewsQuery, { when }),
+            userId: user.uid,
             googleNewsQuery: googleNewsQuery,
             category: feedCategory || 'News',
             order: feeds.length,

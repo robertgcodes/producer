@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ActivityLogProvider } from "@/contexts/ActivityLogContext";
-import { ActivityLog } from "@/components/ActivityLog";
+import { ActivityLogWrapper } from "@/components/ActivityLogWrapper";
 import { Toaster } from "sonner";
 
 const inter = Inter({ 
@@ -40,7 +40,7 @@ export default function RootLayout({
           <AuthProvider>
             <ActivityLogProvider>
               {children}
-              <ActivityLog />
+              <ActivityLogWrapper />
               <Toaster richColors position="top-right" />
             </ActivityLogProvider>
           </AuthProvider>

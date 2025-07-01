@@ -235,3 +235,6 @@ export interface BundleFile {
 
 // Re-export story cache types
 export * from './storyCache';
+
+// Re-export user types
+export * from './user';

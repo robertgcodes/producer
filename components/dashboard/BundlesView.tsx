@@ -8,6 +8,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { ArticleIcon, VideoIcon, TweetIcon, SocialIcon, PollIcon } from '@/components/icons';
 import { toast } from 'sonner';
 import { BundleSearchService } from '@/lib/services/bundleSearchService';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface BundlesViewProps {
   activeProject: any;
@@ -24,6 +25,7 @@ export function BundlesView({
   isLoadingBundles,
   onDeleteStory 
 }: BundlesViewProps) {
+  const { user } = useAuth();
   const [showAddBundle, setShowAddBundle] = useState(false);
   const [showAddStory, setShowAddStory] = useState(false);
   const [showBundleDetail, setShowBundleDetail] = useState(false);
@@ -51,11 +53,12 @@ export function BundlesView({
 
   const handleCreateBundle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeProject || !bundleTitle.trim()) return;
+    if (!activeProject || !bundleTitle.trim() || !user) return;
 
     try {
       const bundleData = {
         projectId: activeProject.id,
+        userId: user.uid,
         title: bundleTitle,
         description: bundleDescription,
         theme: '',
