@@ -396,7 +396,7 @@ export function AssetsTab({ bundle, stories }: AssetsTabProps) {
                     </div>
                   ) : (
                     // Regular display for tweets and instagram
-                    generatedContent[model.id][activeContentType].map((item, index) => (
+                    generatedContent[model.id]?.[activeContentType]?.map((item, index) => (
                       <div key={index} className="group relative p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-sm text-gray-700 dark:text-gray-300 pr-8">
                           {item}
