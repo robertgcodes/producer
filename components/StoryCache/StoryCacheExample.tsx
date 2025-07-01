@@ -62,21 +62,26 @@ export function StoryCacheExample({
             )}
           </div>
 
-          {story.enrichment && (
+          {story.metadata && (
             <div className="mt-2">
-              {story.enrichment.aiSummary && (
-                <p className="text-sm text-gray-600 italic">
-                  AI Summary: {story.enrichment.aiSummary}
+              {story.metadata.author && (
+                <p className="text-sm text-gray-600">
+                  By: {story.metadata.author}
                 </p>
               )}
-              {story.enrichment.keyEntities && story.enrichment.keyEntities.length > 0 && (
+              {story.metadata.categories && story.metadata.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {story.enrichment.keyEntities.map((entity, idx) => (
+                  {story.metadata.categories.map((category, idx) => (
                     <span key={idx} className="px-2 py-1 bg-gray-100 rounded text-xs">
-                      {entity}
+                      {category}
                     </span>
                   ))}
                 </div>
+              )}
+              {story.metadata.duration && story.sourceType === 'video' && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Duration: {story.metadata.duration}
+                </p>
               )}
             </div>
           )}
@@ -91,9 +96,9 @@ export function StoryCacheExample({
         )}
       </div>
       
-      {story.duplicateOf && (
+      {story.relevanceScore && (
         <div className="mt-2 text-xs text-gray-500">
-          Duplicate of story ID: {story.duplicateOf}
+          Relevance Score: {story.relevanceScore.toFixed(2)}
         </div>
       )}
     </div>
