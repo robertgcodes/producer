@@ -12,7 +12,19 @@ interface PromptTemplateManagerProps {
 
 export function PromptTemplateManager({ onClose }: PromptTemplateManagerProps) {
   const [templates, setTemplates] = useState<PromptTemplate[]>([]);
-  const [defaultPrompts, setDefaultPrompts] = useState<Record<ResearchBlockType, string>>({});
+  const [defaultPrompts, setDefaultPrompts] = useState<Record<ResearchBlockType, string>>({
+    bio: '',
+    judge: '',
+    politician: '',
+    nonprofit: '',
+    federal_agency: '',
+    prosecutor: '',
+    defense_attorney: '',
+    criminal_defendant: '',
+    related_persons: '',
+    institution: '',
+    custom: ''
+  });
   const [activeTab, setActiveTab] = useState<'templates' | 'defaults'>('templates');
   const [editingTemplate, setEditingTemplate] = useState<PromptTemplate | null>(null);
   const [isCreating, setIsCreating] = useState(false);
