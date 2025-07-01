@@ -14,7 +14,7 @@ import {
   increment,
   Timestamp
 } from 'firebase/firestore';
-import { db } from '@/firebase/config';
+import { db } from '@/lib/firebase';
 import {
   BundleStoryCache,
   StoryChunk,
@@ -31,14 +31,14 @@ export class StoryCacheService {
    * Get or create a cache document for a bundle
    */
   static async getOrCreateCache(bundleId: string): Promise<BundleStoryCache> {
-    const cacheRef = doc(db, CACHE_COLLECTIONS.BUNDLE_STORY_CACHE, bundleId);
+    const cacheRef = doc(db, CACHE_COLLECTIONS.CACHE_DOCS, bundleId);
     const cacheDoc = await getDoc(cacheRef);
 
     if (cacheDoc.exists()) {
       const data = cacheDoc.data();
       return {
         ...data,
-        lastRefreshTime: data.lastRefreshTime?.toDate(),
+        lastRefreshed: data.lastRefreshed?.toDate(),
         createdAt: data.createdAt?.toDate(),
         updatedAt: data.updatedAt?.toDate(),
       } as BundleStoryCache;
@@ -48,7 +48,7 @@ export class StoryCacheService {
     const newCache: BundleStoryCache = {
       id: bundleId,
       bundleId,
-      lastRefreshTime: new Date(),
+      lastRefreshed: new Date(),
       refreshStatus: 'idle',
       metadata: {
         totalStoryCount: 0,
@@ -58,17 +58,17 @@ export class StoryCacheService {
         cacheVersion: 1,
       },
       summary: {
-        sourceDistribution: {},
+        totalStories: 0,
+        storiesByType: {},
+        storiesBySource: {},
         dateRange: {
-          earliest: new Date(),
-          latest: new Date(),
+          earliest: null,
+          latest: null,
         },
-        topSources: [],
       },
       settings: {
-        maxAge: STORY_CACHE_CONSTANTS.DEFAULT_CACHE_MAX_AGE,
-        autoRefresh: false,
-        deduplication: 'url',
+        maxAgeHours: STORY_CACHE_CONSTANTS.MAX_CACHE_AGE_HOURS,
+        deduplicationMethod: 'url',
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -87,8 +87,8 @@ export class StoryCacheService {
    * Check if cache needs refresh
    */
   static isCacheStale(cache: BundleStoryCache): boolean {
-    const age = Date.now() - cache.lastRefreshTime.getTime();
-    return age > cache.settings.maxAge;
+    const age = Date.now() - cache.lastRefreshed.getTime();
+    return age > cache.settings.maxAgeHours;
   }
 
   /**
@@ -100,10 +100,10 @@ export class StoryCacheService {
     config: CacheRefreshConfig
   ): Promise<void> {
     const batch = writeBatch(db);
-    const cacheRef = doc(db, CACHE_COLLECTIONS.BUNDLE_STORY_CACHE, bundleId);
+    const cacheRef = doc(db, CACHE_COLLECTIONS.CACHE_DOCS, bundleId);
     
     // Deduplicate stories
-    const uniqueStories = this.deduplicateStories(stories, config.deduplication);
+    const uniqueStories = this.deduplicateStories(stories, cache.settings.deduplicationMethod);
     
     // Split into chunks
     const chunks = this.createStoryChunks(uniqueStories);
@@ -122,7 +122,7 @@ export class StoryCacheService {
 
     // Update main cache document
     batch.update(cacheRef, {
-      lastRefreshTime: serverTimestamp(),
+      lastRefreshed: serverTimestamp(),
       refreshStatus: 'completed',
       metadata,
       summary,
@@ -133,9 +133,9 @@ export class StoryCacheService {
     for (let i = 0; i < chunks.length; i++) {
       const chunkRef = doc(
         db,
-        CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+        CACHE_COLLECTIONS.CACHE_DOCS,
         bundleId,
-        CACHE_COLLECTIONS.STORY_CHUNKS,
+        CACHE_COLLECTIONS.CACHE_CHUNKS,
         `chunk_${i}`
       );
       
@@ -181,15 +181,15 @@ export class StoryCacheService {
 
     const chunksRef = collection(
       db,
-      CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+      CACHE_COLLECTIONS.CACHE_DOCS,
       bundleId,
-      CACHE_COLLECTIONS.STORY_CHUNKS
+      CACHE_COLLECTIONS.CACHE_CHUNKS
     );
 
     const chunksQuery = query(
       chunksRef,
       orderBy('chunkIndex'),
-      limit(Math.ceil((options?.limit || 100) / STORY_CACHE_CONSTANTS.MAX_STORIES_PER_CHUNK))
+      limit(Math.ceil((options?.limit || 100) / STORY_CACHE_CONSTANTS.MAX_CHUNK_SIZE))
     );
 
     const chunksSnapshot = await getDocs(chunksQuery);
@@ -238,9 +238,9 @@ export class StoryCacheService {
     // Get all chunks
     const chunksRef = collection(
       db,
-      CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+      CACHE_COLLECTIONS.CACHE_DOCS,
       bundleId,
-      CACHE_COLLECTIONS.STORY_CHUNKS
+      CACHE_COLLECTIONS.CACHE_CHUNKS
     );
     
     const chunks = await getDocs(chunksRef);
@@ -251,9 +251,9 @@ export class StoryCacheService {
     // Get all indices
     const indicesRef = collection(
       db,
-      CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+      CACHE_COLLECTIONS.CACHE_DOCS,
       bundleId,
-      CACHE_COLLECTIONS.INDICES
+      CACHE_COLLECTIONS.CACHE_INDEXES
     );
     
     const indices = await getDocs(indicesRef);
@@ -262,7 +262,7 @@ export class StoryCacheService {
     });
 
     // Update main cache document
-    const cacheRef = doc(db, CACHE_COLLECTIONS.BUNDLE_STORY_CACHE, bundleId);
+    const cacheRef = doc(db, CACHE_COLLECTIONS.CACHE_DOCS, bundleId);
     batch.update(cacheRef, {
       refreshStatus: 'idle',
       metadata: {
@@ -321,7 +321,7 @@ export class StoryCacheService {
       const storySize = JSON.stringify(story).length;
       
       if (
-        currentChunk.length >= STORY_CACHE_CONSTANTS.MAX_STORIES_PER_CHUNK ||
+        currentChunk.length >= STORY_CACHE_CONSTANTS.MAX_CHUNK_SIZE ||
         currentSize + storySize > STORY_CACHE_CONSTANTS.MAX_CHUNK_SIZE_BYTES
       ) {
         chunks.push(currentChunk);
@@ -444,9 +444,9 @@ export class StoryCacheService {
     // Write indices
     const dateIndexRef = doc(
       db,
-      CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+      CACHE_COLLECTIONS.CACHE_DOCS,
       bundleId,
-      CACHE_COLLECTIONS.INDICES,
+      CACHE_COLLECTIONS.CACHE_INDEXES,
       'byDate'
     );
     batch.set(dateIndexRef, {
@@ -456,9 +456,9 @@ export class StoryCacheService {
 
     const sourceIndexRef = doc(
       db,
-      CACHE_COLLECTIONS.BUNDLE_STORY_CACHE,
+      CACHE_COLLECTIONS.CACHE_DOCS,
       bundleId,
-      CACHE_COLLECTIONS.INDICES,
+      CACHE_COLLECTIONS.CACHE_INDEXES,
       'bySource'
     );
     batch.set(sourceIndexRef, {
