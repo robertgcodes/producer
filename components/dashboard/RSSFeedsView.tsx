@@ -441,7 +441,16 @@ export function RSSFeedsView() {
           const docRef = await addDoc(collection(db, 'rssFeeds'), cleanFirestoreData(feedDoc));
           
           // Update feed items in separate collection
-          await RSSService.updateFeedItems(docRef.id, feedData);
+          const feedDataWithDefaults = {
+            ...feedData,
+            items: feedData.items.map(item => ({
+              ...item,
+              pubDate: item.pubDate || new Date().toISOString(),
+              contentSnippet: item.contentSnippet || '',
+              guid: item.guid || item.link
+            }))
+          };
+          await RSSService.updateFeedItems(docRef.id, feedDataWithDefaults);
           
           toast.success(`Google News feed "${feedTitle}" added successfully!`);
         } catch (error) {
