@@ -38,6 +38,20 @@ export interface Bundle {
   selectedFeedIds?: string[]; // IDs of feeds selected for this bundle
   searchTerms?: string[]; // Additional search terms for this bundle (e.g., ["Donald Trump", "Trump", "Melania Trump"])
   icon?: string; // Icon type or emoji for the bundle
+  oppoResearch?: {
+    subject: {
+      name: string;
+      position?: string;
+      organization?: string;
+      imageUrl?: string;
+    } | null;
+    summary: string[];
+    sections: Array<{
+      id: string;
+      title: string;
+      content: string;
+    }>;
+  };
 }
 
 export interface ContentItem {
