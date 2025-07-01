@@ -48,8 +48,15 @@ export class StoryCacheService {
     const newCache: BundleStoryCache = {
       id: bundleId,
       bundleId,
+      bundleTitle: '',
       lastRefreshed: new Date(),
-      refreshStatus: 'idle',
+      lastAccessed: new Date(),
+      storyCount: 0,
+      chunkCount: 0,
+      searchTerms: [],
+      selectedFeedIds: [],
+      cacheVersion: 1,
+      status: 'active',
       metadata: {
         totalStoryCount: 0,
         chunkCount: 0,
@@ -61,6 +68,8 @@ export class StoryCacheService {
         totalStories: 0,
         storiesByType: {},
         storiesBySource: {},
+        sourceDistribution: {},
+        topSources: [],
         dateRange: {
           earliest: null,
           latest: null,
@@ -123,7 +132,7 @@ export class StoryCacheService {
     // Update main cache document
     batch.update(cacheRef, {
       lastRefreshed: serverTimestamp(),
-      refreshStatus: 'completed',
+      status: 'active',
       metadata,
       summary,
       updatedAt: serverTimestamp(),
@@ -204,17 +213,17 @@ export class StoryCacheService {
     let filteredStories = allStories;
     
     if (options?.filterSource) {
-      filteredStories = allStories.filter(s => s.source.name === options.filterSource);
+      filteredStories = allStories.filter(s => s.source?.name === options.filterSource);
     }
 
     // Sort stories
     if (options?.sortBy === 'date') {
       filteredStories.sort((a, b) => 
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        (b.publishedAt ? new Date(b.publishedAt).getTime() : 0) - (a.publishedAt ? new Date(a.publishedAt).getTime() : 0)
       );
     } else if (options?.sortBy === 'relevance') {
       filteredStories.sort((a, b) => 
-        (b.enrichment?.relevanceScore || 0) - (a.enrichment?.relevanceScore || 0)
+        (b.relevanceScore || 0) - (a.relevanceScore || 0)
       );
     }
 
@@ -350,11 +359,12 @@ export class StoryCacheService {
 
     for (const story of stories) {
       // Count sources
-      const count = sourceCount.get(story.source.name) || 0;
-      sourceCount.set(story.source.name, count + 1);
+      const sourceName = story.source?.name || 'Unknown';
+      const count = sourceCount.get(sourceName) || 0;
+      sourceCount.set(sourceName, count + 1);
 
       // Track date range
-      const storyDate = new Date(story.publishedAt);
+      const storyDate = story.publishedAt ? new Date(story.publishedAt) : new Date();
       if (storyDate < earliestDate) earliestDate = storyDate;
       if (storyDate > latestDate) latestDate = storyDate;
     }
@@ -366,16 +376,25 @@ export class StoryCacheService {
       .map(([name, count]) => ({
         name,
         count,
-        credibility: stories.find(s => s.source.name === name)?.source.credibility,
+        credibility: stories.find(s => s.source?.name === name)?.source?.credibility,
       }));
 
+    // Count stories by type
+    const storiesByType: Record<string, number> = {};
+    stories.forEach(story => {
+      storiesByType[story.sourceType] = (storiesByType[story.sourceType] || 0) + 1;
+    });
+
     return {
+      totalStories: stories.length,
+      storiesByType,
+      storiesBySource: Object.fromEntries(sourceCount),
       sourceDistribution: Object.fromEntries(sourceCount),
       dateRange: {
         earliest: earliestDate,
         latest: latestDate,
       },
-      topSources,
+      topSources: topSources.map(({ name, count }) => ({ name, count })),
     };
   }
 
@@ -476,7 +495,7 @@ export class StoryCacheService {
     bundleId: string,
     operation: 'read' | 'write'
   ): Promise<void> {
-    const statsRef = doc(db, CACHE_COLLECTIONS.CACHE_STATS, bundleId);
+    const statsRef = doc(db, CACHE_COLLECTIONS.CACHE_DOCS, `${bundleId}_stats`);
     
     try {
       await updateDoc(statsRef, {

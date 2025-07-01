@@ -119,7 +119,7 @@ export function StoryCacheExample({
             <div>
               <span className="text-gray-600">Last Refresh:</span>
               <p className="font-semibold">
-                {new Date(cache.lastRefreshTime).toLocaleString()}
+                {new Date(cache.lastRefreshed).toLocaleString()}
               </p>
             </div>
             <div>

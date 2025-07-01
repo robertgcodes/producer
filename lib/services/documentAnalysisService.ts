@@ -130,9 +130,7 @@ export class DocumentAnalysisService {
       const result = await response.json();
       
       // Update file document with analysis results
-      const updates: Partial<BundleFile> = {
-        updatedAt: new Date(),
-      };
+      const updates: Partial<BundleFile> = {};
       
       // Handle different analysis types
       if (analysisType === 'summary') {

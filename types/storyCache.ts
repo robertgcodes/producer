@@ -7,10 +7,14 @@ export type StoryIndex = StoryCacheIndex;
 
 // Cache refresh configuration
 export interface CacheRefreshConfig {
+  bundleId?: string;
   forceRefresh?: boolean;
   maxAgeHours?: number;
   includeFeeds?: string[];
   excludeFeeds?: string[];
+  searchTerms?: string[];
+  selectedFeedIds?: string[];
+  deduplication?: 'url' | 'title' | 'both';
 }
 
 // Cache statistics
@@ -52,11 +56,22 @@ export interface StoryCacheDocument {
   createdAt: Date;
   updatedAt: Date;
   
+  // Metadata
+  metadata: {
+    totalStoryCount: number;
+    chunkCount: number;
+    searchTerms: string[];
+    selectedFeedIds: string[];
+    cacheVersion: number;
+  };
+  
   // Summary data for quick access
   summary: {
     totalStories: number;
     storiesByType: Record<string, number>;
     storiesBySource: Record<string, number>;
+    sourceDistribution: Record<string, number>;
+    topSources: Array<{ name: string; count: number }>;
     dateRange: {
       earliest: Date | null;
       latest: Date | null;
