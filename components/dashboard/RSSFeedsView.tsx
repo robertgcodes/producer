@@ -34,6 +34,7 @@ interface RSSFeed {
   lastError?: string;
   errorCount?: number;
   lastSuccessfulFetch?: Date;
+  createdAt?: any; // Can be Date or Firestore Timestamp
 }
 
 interface RSSItem {
