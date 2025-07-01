@@ -32,7 +32,7 @@ export function toDate(value: any): Date | null {
   return null;
 }
 
-export function formatDate(value: any, format: 'time' | 'date' | 'datetime' = 'datetime'): string {
+export function formatDate(value: any, format: 'time' | 'date' | 'datetime' | 'relative' = 'datetime'): string {
   const date = toDate(value);
   
   if (!date) {
@@ -40,11 +40,42 @@ export function formatDate(value: any, format: 'time' | 'date' | 'datetime' = 'd
   }
   
   try {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    // Handle future dates
+    if (diffMs < 0) {
+      // If date is in the future, show it as "Future" or the actual date
+      if (format === 'relative' || format === 'time') {
+        return 'Future date';
+      }
+    }
+    
     switch (format) {
       case 'time':
-        return date.toLocaleTimeString();
+        // For recent items (less than 24 hours), show relative time
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays}d ago`;
+        // For older items, show the date
+        return date.toLocaleDateString();
+        
       case 'date':
         return date.toLocaleDateString();
+        
+      case 'relative':
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 30) return `${diffDays} days ago`;
+        return date.toLocaleDateString();
+        
       case 'datetime':
       default:
         return date.toLocaleString();

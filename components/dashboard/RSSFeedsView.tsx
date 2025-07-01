@@ -145,7 +145,14 @@ function RSSFeedBlock({ feed, onDelete, onRefresh, onEdit }: RSSFeedBlockProps) 
       {feed.items && feed.items.length > 0 ? (
         <div className="mb-4">
           <div className="space-y-2 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-            {feed.items.map((item, idx) => (
+            {feed.items
+              .sort((a, b) => {
+                // Sort by publication date, newest first
+                const dateA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+                const dateB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+                return dateB - dateA;
+              })
+              .map((item, idx) => (
               <div key={idx} className="text-sm">
                 <a
                   href={item.link}

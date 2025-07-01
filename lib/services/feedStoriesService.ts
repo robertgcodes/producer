@@ -136,6 +136,19 @@ export class FeedStoriesService {
             skipped++;
           } else {
             // Create new story
+            // Parse and validate publication date
+            let pubDateString = story.pubDate || story.createdAt || new Date().toISOString();
+            let pubDate = new Date(pubDateString);
+            const now = new Date();
+            
+            // If date is invalid or in the future, use current date
+            if (isNaN(pubDate.getTime()) || pubDate > now) {
+              if (pubDate > now) {
+                console.warn(`Future date detected for story "${story.title}" (${pubDateString}) - using current date`);
+              }
+              pubDateString = now.toISOString();
+            }
+            
             const storyData: FeedStory = {
               id: storyId,
               feedId,
@@ -145,7 +158,7 @@ export class FeedStoriesService {
               link: storyUrl,
               contentSnippet: story.contentSnippet || story.text,
               description: story.description || story.contentSnippet || story.text,
-              pubDate: story.pubDate || story.createdAt || new Date().toISOString(),
+              pubDate: pubDateString,
               guid: story.guid || storyUrl,
               categories: story.categories || [],
               thumbnail: story.thumbnail,
