@@ -39,6 +39,8 @@ export interface Bundle {
   selectedFeedIds?: string[]; // IDs of feeds selected for this bundle
   searchTerms?: string[]; // Additional search terms for this bundle (e.g., ["Donald Trump", "Trump", "Melania Trump"])
   icon?: string; // Icon type or emoji for the bundle
+  contentItems?: ContentItem[]; // Content items in this bundle
+  tags?: string[]; // Tags for categorization
   oppoResearch?: {
     subject: {
       name: string;

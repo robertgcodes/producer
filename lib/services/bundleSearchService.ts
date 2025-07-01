@@ -13,6 +13,7 @@ interface FeedItem {
   contentSnippet?: string;
   categories?: string[];
   thumbnail?: string;
+  guid?: string;
 }
 
 interface Feed {

@@ -5,6 +5,7 @@ interface FeedItem {
   feedCategory?: string;
   feedTitle?: string;
   pubDate?: string;
+  guid?: string;
 }
 
 interface TitleTemplate {

@@ -5,7 +5,7 @@ import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
 import { activityLog } from './activityLogService';
 
 interface AnalysisPrompt {
-  type: 'legal' | 'opposition' | 'summary' | 'custom';
+  type: 'legal' | 'opposition' | 'summary' | 'custom' | 'timeline' | 'entities' | 'financial';
   prompt: string;
 }
 

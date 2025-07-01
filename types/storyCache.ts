@@ -1,4 +1,41 @@
 // Story cache types for Firestore storage
+
+// Type aliases for clarity
+export type BundleStoryCache = StoryCacheDocument;
+export type StoryChunk = StoryCacheChunk;
+export type StoryIndex = StoryCacheIndex;
+
+// Cache refresh configuration
+export interface CacheRefreshConfig {
+  forceRefresh?: boolean;
+  maxAgeHours?: number;
+  includeFeeds?: string[];
+  excludeFeeds?: string[];
+}
+
+// Cache statistics
+export interface CacheStats {
+  totalStories: number;
+  totalChunks: number;
+  sizeInBytes: number;
+  lastRefreshed: Date;
+  lastAccessed: Date;
+  hitRate: number;
+}
+
+// Constants
+export const STORY_CACHE_CONSTANTS = {
+  MAX_CHUNK_SIZE: 100,
+  MAX_CACHE_AGE_HOURS: 24,
+  CHUNK_SIZE_LIMIT: 1024 * 1024, // 1MB
+};
+
+export const CACHE_COLLECTIONS = {
+  CACHE_DOCS: 'storyCache',
+  CACHE_CHUNKS: 'chunks',
+  CACHE_INDEXES: 'indexes',
+};
+
 export interface StoryCacheDocument {
   id: string; // bundleId
   bundleId: string;
@@ -56,6 +93,20 @@ export interface CachedStory {
   publishedAt?: Date;
   relevanceScore: number;
   order: number;
+  
+  // Source information
+  source?: {
+    name: string;
+    credibility?: 'high' | 'medium' | 'low';
+    url?: string;
+  };
+  
+  // Enrichment data
+  enrichment?: {
+    aiSummary?: string;
+    entities?: string[];
+    sentiment?: 'positive' | 'negative' | 'neutral';
+  };
   
   // Minimal metadata
   metadata?: {
