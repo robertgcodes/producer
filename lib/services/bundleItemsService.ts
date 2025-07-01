@@ -1,4 +1,4 @@
-import { collection, doc, setDoc, deleteDoc, query, where, getDocs, writeBatch, onSnapshot, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, setDoc, deleteDoc, query, where, getDocs, writeBatch, onSnapshot, orderBy, limit as firestoreLimit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Bundle } from '@/types';
 import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
@@ -186,7 +186,7 @@ export class BundleItemsService {
       );
       
       if (limit) {
-        q = query(q, limit(limit));
+        q = query(q, firestoreLimit(limit));
       }
       
       const snapshot = await getDocs(q);

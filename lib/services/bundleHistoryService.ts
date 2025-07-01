@@ -42,10 +42,12 @@ export class BundleHistoryService {
       
       return snapshot.docs.map(doc => {
         const data = doc.data() as Bundle;
+        const createdAtField = data.createdAt as any;
+        const createdAt = createdAtField?.toDate ? createdAtField.toDate() : new Date(createdAtField);
         return {
           title: data.title,
           description: data.description,
-          createdAt: data.createdAt.toDate(),
+          createdAt,
           contentCount: data.contentItems?.length || 0,
           tags: data.tags
         };

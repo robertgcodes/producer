@@ -9,12 +9,12 @@ import { FeedStoriesService } from './feedStoriesService';
 interface RSSItem {
   title: string;
   link: string;
-  pubDate: string;
-  contentSnippet: string;
+  pubDate?: string;
+  contentSnippet?: string;
   content?: string;
   creator?: string;
   categories?: string[];
-  guid: string;
+  guid?: string;
   mediaContent?: any[];
   mediaThumbnail?: any;
   thumbnail?: string;

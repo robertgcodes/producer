@@ -2,6 +2,20 @@ import { collection, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'fire
 import { db } from '@/lib/firebase';
 import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
 
+interface FeedData {
+  id: string;
+  title: string;
+  url?: string;
+  googleNewsQuery?: string;
+  twitterUsername?: string;
+  type?: string;
+  errorCount?: number;
+  lastError?: string;
+  lastFetched?: any;
+  lastSuccessfulFetch?: any;
+  createdAt?: any;
+}
+
 interface FeedHealth {
   id: string;
   title: string;
@@ -70,7 +84,7 @@ export class FeedHealthService {
       const feeds = feedsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })) as FeedData[];
 
       const healthy: FeedHealth[] = [];
       const problematic: FeedHealth[] = [];
@@ -79,7 +93,7 @@ export class FeedHealthService {
       const now = new Date();
       const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
 
-      feeds.forEach(feed => {
+      feeds.forEach((feed: FeedData) => {
         const errorCount = feed.errorCount || 0;
         const lastSuccessfulFetch = feed.lastSuccessfulFetch?.toDate?.() || feed.lastSuccessfulFetch;
         const lastFetched = feed.lastFetched?.toDate?.() || feed.lastFetched;
