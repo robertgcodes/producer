@@ -11,7 +11,7 @@ import {
   Timestamp
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { UserProfile, UserRole, BundleShare, TeamMember, APIKeyStatus } from '@/types/user';
+import { UserProfile, BundleShare, TeamMember, APIKeyStatus, BundlePermission } from '@/types/user';
 
 // Admin email from environment variable
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@watcherpro.ai';
