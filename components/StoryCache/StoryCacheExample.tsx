@@ -169,7 +169,7 @@ export function StoryCacheExample({
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-2">Top Sources</h3>
           <div className="flex flex-wrap gap-2">
-            {cache.summary.topSources.map((source) => (
+            {cache.summary.topSources.map((source: { name: string; count: number }) => (
               <button
                 key={source.name}
                 onClick={() => {
