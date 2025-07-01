@@ -2231,15 +2231,15 @@ export function RSSFeedsView() {
                       <h4 className="font-medium text-gray-900 dark:text-white">Feeds That Can Be Converted</h4>
                       <button
                         onClick={() => {
-                          if (selectedConvertibleFeeds.size === feedHealth.convertible.length) {
+                          if (selectedConvertibleFeeds.size === feedHealth.convertible?.length) {
                             setSelectedConvertibleFeeds(new Set());
                           } else {
-                            setSelectedConvertibleFeeds(new Set(feedHealth.convertible.map(f => f.id)));
+                            setSelectedConvertibleFeeds(new Set(feedHealth.convertible?.map(f => f.id) || []));
                           }
                         }}
                         className="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400"
                       >
-                        {selectedConvertibleFeeds.size === feedHealth.convertible.length ? 'Deselect All' : 'Select All'}
+                        {selectedConvertibleFeeds.size === feedHealth.convertible?.length ? 'Deselect All' : 'Select All'}
                       </button>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
