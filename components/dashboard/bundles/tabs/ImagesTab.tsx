@@ -278,7 +278,7 @@ export function ImagesTab({ bundle, stories }: ImagesTabProps) {
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         entity.type === 'person' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
                         entity.type === 'organization' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                        entity.type === 'location' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                        entity.type === 'place' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
                         'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                       }`}>
                         {entity.type}
