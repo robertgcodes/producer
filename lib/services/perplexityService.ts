@@ -256,10 +256,10 @@ Return ONLY the titles, one per line, without numbers or quotation marks.`;
       // Split response into individual titles and clean them
       const titles = responseText
         .split('\n')
-        .map(title => title.trim())
-        .filter(title => title.length > 0)
-        .filter(title => !title.match(/^\d+\./)) // Remove numbered lists
-        .map(title => title.replace(/^["']|["']$/g, '')) // Remove quotes
+        .map((title: string) => title.trim())
+        .filter((title: string) => title.length > 0)
+        .filter((title: string) => !title.match(/^\d+\./)) // Remove numbered lists
+        .map((title: string) => title.replace(/^["']|["']$/g, '')) // Remove quotes
         .slice(0, count);
 
       return titles;

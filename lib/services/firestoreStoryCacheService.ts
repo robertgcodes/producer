@@ -35,14 +35,10 @@ export class FirestoreStoryCacheService {
       thumbnail: item.thumbnail,
       sourceType: item.sourceType,
       sourceName: item.sourceInfo.name,
-      publishedAt: item.publishedAt,
+      publishedAt: item.publishedAt instanceof Date ? item.publishedAt : (item.publishedAt ? new Date(item.publishedAt) : undefined),
       relevanceScore: 0, // Will be set by search service
       order,
-      metadata: {
-        author: item.author,
-        categories: item.categories,
-        duration: item.duration
-      }
+      metadata: {}
     };
   }
   
@@ -64,10 +60,7 @@ export class FirestoreStoryCacheService {
       priority: false,
       userAction: 'unreviewed',
       addedAt: new Date(),
-      order: story.order,
-      author: story.metadata?.author,
-      categories: story.metadata?.categories,
-      duration: story.metadata?.duration
+      order: story.order
     };
   }
   
@@ -91,7 +84,9 @@ export class FirestoreStoryCacheService {
       });
       
       // Check if cache is stale
-      const ageHours = (Date.now() - cacheData.lastRefreshed.toDate().getTime()) / (1000 * 60 * 60);
+      const lastRefreshed = cacheData.lastRefreshed as any;
+      const refreshDate = lastRefreshed?.toDate ? lastRefreshed.toDate() : new Date(lastRefreshed);
+      const ageHours = (Date.now() - refreshDate.getTime()) / (1000 * 60 * 60);
       if (ageHours > (cacheData.settings?.maxAgeHours || this.DEFAULT_MAX_AGE_HOURS)) {
         console.log(`Cache for bundle ${bundleId} is stale (${ageHours.toFixed(1)} hours old)`);
         // Don't return null - return stale cache but mark it
@@ -307,7 +302,9 @@ export class FirestoreStoryCacheService {
     const metadata = await this.getCacheMetadata(bundleId);
     if (!metadata) return false;
     
-    const ageHours = (Date.now() - metadata.lastRefreshed.toDate().getTime()) / (1000 * 60 * 60);
+    const lastRefreshed = metadata.lastRefreshed as any;
+    const refreshDate = lastRefreshed?.toDate ? lastRefreshed.toDate() : new Date(lastRefreshed);
+    const ageHours = (Date.now() - refreshDate.getTime()) / (1000 * 60 * 60);
     const maxAge = maxAgeHours || metadata.settings?.maxAgeHours || this.DEFAULT_MAX_AGE_HOURS;
     
     return ageHours <= maxAge;

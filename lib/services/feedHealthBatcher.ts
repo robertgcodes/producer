@@ -87,7 +87,7 @@ class FeedHealthBatcher {
       // Get current feed data for error counts
       const { collection, getDocs } = await import('firebase/firestore');
       const feedsSnapshot = await getDocs(collection(db, 'rssFeeds'));
-      const feedsMap = new Map(
+      const feedsMap = new Map<string, any>(
         feedsSnapshot.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }])
       );
 

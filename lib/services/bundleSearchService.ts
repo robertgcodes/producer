@@ -571,8 +571,8 @@ export class BundleSearchService {
           
           // Add search results (avoiding duplicates)
           searchResults.forEach(result => {
-            const key = result.item.link || result.item.guid;
-            if (!uniqueItems.has(key)) {
+            const key = result.item.link || result.item.guid || '';
+            if (key && !uniqueItems.has(key)) {
               uniqueItems.set(key, result);
             }
           });

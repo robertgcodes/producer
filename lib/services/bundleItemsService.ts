@@ -211,7 +211,7 @@ export class BundleItemsService {
     );
     
     if (limitCount) {
-      q = query(q, limit(limitCount));
+      q = query(q, firestoreLimit(limitCount));
     }
     
     const unsubscribe = onSnapshot(q, (snapshot) => {

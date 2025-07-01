@@ -103,7 +103,7 @@ export interface CachedStory {
   title: string;
   description?: string;
   thumbnail?: string;
-  sourceType: 'article' | 'video' | 'tweet' | 'social';
+  sourceType: 'article' | 'video' | 'tweet' | 'social' | 'poll';
   sourceName: string;
   publishedAt?: Date;
   relevanceScore: number;

@@ -82,7 +82,7 @@ export function useStoryCache({
           bundleId,
           searchTerms: cache.metadata.searchTerms,
           selectedFeedIds: cache.metadata.selectedFeedIds,
-          deduplication: cache.settings.deduplication,
+          deduplication: cache.settings.deduplicationMethod,
         });
       }
     };
@@ -168,13 +168,13 @@ export function useStoryCache({
   }) => {
     return stories.filter(story => {
       // Filter by source
-      if (filter.source && story.source.name !== filter.source) {
+      if (filter.source && story.source?.name !== filter.source) {
         return false;
       }
 
       // Filter by date range
       if (filter.dateRange) {
-        const storyDate = new Date(story.publishedAt);
+        const storyDate = story.publishedAt ? new Date(story.publishedAt) : new Date();
         if (storyDate < filter.dateRange.start || storyDate > filter.dateRange.end) {
           return false;
         }

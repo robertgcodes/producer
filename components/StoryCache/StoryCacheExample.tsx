@@ -36,7 +36,6 @@ export function StoryCacheExample({
       searchTerms,
       selectedFeedIds,
       deduplication: 'url',
-      enrichWithAI: true,
     });
   };
 
