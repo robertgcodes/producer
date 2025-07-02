@@ -14,6 +14,13 @@ if (!getApps().length) {
   // Check for service account in environment variable (works for both local and Vercel)
   const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
   
+  console.log('[Firebase Admin] Environment check:', {
+    hasKey: !!serviceAccountKey,
+    keyLength: serviceAccountKey?.length || 0,
+    keyStart: serviceAccountKey?.substring(0, 20) || 'not found',
+    allEnvKeys: Object.keys(process.env).filter(k => k.includes('FIREBASE'))
+  });
+  
   if (serviceAccountKey) {
     try {
       // Parse the service account JSON
@@ -27,6 +34,7 @@ if (!getApps().length) {
       console.log('[Firebase Admin] Initialized with service account');
     } catch (error) {
       console.error('[Firebase Admin] Failed to parse service account:', error);
+      console.error('[Firebase Admin] Key preview:', serviceAccountKey.substring(0, 100));
       throw new Error('Invalid FIREBASE_SERVICE_ACCOUNT_KEY format');
     }
   } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
