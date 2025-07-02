@@ -58,28 +58,30 @@ export class FeedRefreshServiceServer {
               switch (feed.type) {
                 case 'twitter':
                   if (feed.twitterUsername) {
-                    feedItemCount = await TwitterService.fetchAndStoreTweets(feed.twitterUsername);
+                    feedItemCount = await TwitterService.refreshTwitterFeed(feed.id, feed.twitterUsername);
                   }
                   break;
                   
                 case 'youtube':
-                  if (feed.youtubeUrl) {
-                    feedItemCount = await YouTubeService.fetchAndStoreVideos(feed.youtubeUrl);
+                  if (feed.url) {
+                    // YouTube feeds use RSS under the hood
+                    const result = await RSSService.refreshFeed(feed.id, feed.url);
+                    feedItemCount = result.itemCount;
                   }
                   break;
                   
                 case 'googlenews':
-                  if (feed.googleNewsQuery) {
-                    feedItemCount = await GoogleNewsService.fetchAndStoreNews(
-                      feed.googleNewsQuery,
-                      feed.freshnessFilter
-                    );
+                  if (feed.url) {
+                    // Google News feeds also use RSS
+                    const result = await RSSService.refreshFeed(feed.id, feed.url);
+                    feedItemCount = result.itemCount;
                   }
                   break;
                   
                 case 'rss':
                 default:
-                  feedItemCount = await RSSService.fetchAndStoreRSSItems(feed.url, feed.title);
+                  const result = await RSSService.refreshFeed(feed.id, feed.url);
+                  feedItemCount = result.itemCount;
                   break;
               }
               
