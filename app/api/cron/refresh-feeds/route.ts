@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { FeedRefreshService } from '@/lib/services/feedRefreshService';
-import { BundleSearchService } from '@/lib/services/bundleSearchService';
-import { 
-  collection, 
-  query, 
-  where, 
-  getDocs, 
-  updateDoc,
-  doc,
-  Timestamp
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { FeedRefreshServiceServer } from '@/lib/services/feedRefreshService.server';
+import { BundleSearchServiceServer } from '@/lib/services/bundleSearchService.server';
+import { adminDb } from '@/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 
 // Vercel Cron Jobs run on UTC time
 // This endpoint is configured to run every 30 minutes via vercel.json
@@ -51,7 +43,7 @@ export async function GET(request: Request) {
     };
 
     // Get all RSS feeds from the database
-    const feedsSnapshot = await getDocs(collection(db, 'rssFeeds'));
+    const feedsSnapshot = await adminDb.collection('rssFeeds').get();
     const allFeeds = feedsSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -93,7 +85,7 @@ export async function GET(request: Request) {
       const feedIds = feedsToRefresh.map(f => f.id);
       
       try {
-        const refreshResult = await FeedRefreshService.refreshSpecificFeeds(
+        const refreshResult = await FeedRefreshServiceServer.refreshSpecificFeeds(
           feedIds,
           (current, total) => {
             console.log(`[Cron] Progress: ${current}/${total} feeds`);
@@ -113,7 +105,7 @@ export async function GET(request: Request) {
         });
         
         for (const feedId of successfulFeedIds) {
-          await updateDoc(doc(db, 'rssFeeds', feedId), {
+          await adminDb.collection('rssFeeds').doc(feedId).update({
             lastRefreshed: Timestamp.now()
           });
         }
@@ -132,7 +124,7 @@ export async function GET(request: Request) {
     
     try {
       // Get all bundles
-      const bundlesSnapshot = await getDocs(collection(db, 'bundles'));
+      const bundlesSnapshot = await adminDb.collection('bundles').get();
       results.bundleStories.total = bundlesSnapshot.size;
       
       console.log(`[Cron] Found ${bundlesSnapshot.size} bundles to refresh`);
@@ -145,10 +137,10 @@ export async function GET(request: Request) {
           const bundleTitle = bundleDoc.data().title || 'Untitled';
           
           console.log(`[Cron] Refreshing stories for bundle: ${bundleTitle}`);
-          await BundleSearchService.refreshBundleStoriesFromIndex(bundleId);
+          await BundleSearchServiceServer.refreshBundleStoriesFromIndex(bundleId);
           
           // Update the bundle's lastRefreshed timestamp
-          await updateDoc(doc(db, 'bundles', bundleId), {
+          await adminDb.collection('bundles').doc(bundleId).update({
             lastRefreshed: Timestamp.now()
           });
           
