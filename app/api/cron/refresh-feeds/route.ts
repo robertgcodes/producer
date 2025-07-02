@@ -17,10 +17,22 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const cronSecret = searchParams.get('secret');
     
-    // Check if running in production and verify secret
-    if (process.env.NODE_ENV === 'production' && process.env.CRON_SECRET) {
-      if (cronSecret !== process.env.CRON_SECRET) {
-        console.log('[Cron] Unauthorized request - invalid secret');
+    // Debug logging
+    console.log('[Cron] Environment check:', {
+      NODE_ENV: process.env.NODE_ENV,
+      hasServiceAccount: !!process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      serviceAccountLength: process.env.FIREBASE_SERVICE_ACCOUNT_KEY?.length || 0
+    });
+    
+    // In production, Vercel cron jobs are automatically authenticated
+    // We can optionally add extra security with a custom header check
+    if (process.env.NODE_ENV === 'production') {
+      // Vercel automatically adds headers to cron requests
+      const headersList = await headers();
+      const isVercelCron = headersList.get('x-vercel-cron') === '1';
+      
+      if (!isVercelCron) {
+        console.log('[Cron] Unauthorized request - not from Vercel cron');
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 401 }

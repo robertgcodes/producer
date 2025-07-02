@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/refresh-feeds?secret=$CRON_SECRET",
+      "path": "/api/cron/refresh-feeds",
       "schedule": "*/30 * * * *"
     }
   ]
