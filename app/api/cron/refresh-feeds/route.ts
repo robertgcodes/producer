@@ -22,14 +22,18 @@ export const maxDuration = 300; // 5 minutes max execution time
 export async function GET(request: Request) {
   try {
     // Verify the request is from Vercel Cron
-    const headersList = await headers();
-    const authHeader = headersList.get('authorization');
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.log('[Cron] Unauthorized request');
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const { searchParams } = new URL(request.url);
+    const cronSecret = searchParams.get('secret');
+    
+    // Check if running in production and verify secret
+    if (process.env.NODE_ENV === 'production' && process.env.CRON_SECRET) {
+      if (cronSecret !== process.env.CRON_SECRET) {
+        console.log('[Cron] Unauthorized request - invalid secret');
+        return NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+      }
     }
 
     console.log('[Cron] Starting scheduled feed refresh');
