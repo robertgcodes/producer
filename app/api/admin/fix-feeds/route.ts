@@ -131,7 +131,12 @@ export async function GET(request: Request) {
     const feeds = feedsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
-    }));
+    })) as Array<{
+      id: string;
+      title: string;
+      url?: string;
+      type?: string;
+    }>;
     
     let fixedCount = 0;
     let skippedCount = 0;
