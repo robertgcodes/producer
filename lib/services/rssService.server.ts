@@ -2,7 +2,6 @@ import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import Parser from 'rss-parser';
 import { feedHealthBatcherServer } from './feedHealthBatcher.server';
-import { FeedStoriesService } from './feedStoriesService';
 import { v4 as uuidv4 } from 'uuid';
 import { cleanFirestoreData } from '@/lib/utils/firebaseHelpers';
 
@@ -142,10 +141,8 @@ export class RSSServiceServer {
         itemCount: existingItemsSnapshot.size + newItemCount
       });
 
-      // Store items for bundle matching (if the service exists)
-      if (typeof FeedStoriesService !== 'undefined' && FeedStoriesService.updateFeedStories) {
-        await FeedStoriesService.updateFeedStories(feedId, feedData, 'rss');
-      }
+      // Note: Bundle matching is handled separately by the client-side services
+      // The server-side cron job focuses on storing feed items in Firestore
 
       feedHealthBatcherServer.queueSuccess(feedId);
       return newItemCount;

@@ -1,22 +1,8 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { adminDb } from '../lib/firebase-admin';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config({ path: '.env.local' });
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 // Common RSS feed mappings
 const feedUrlMappings: Record<string, string> = {
@@ -142,7 +128,7 @@ async function fixFeedUrls() {
   
   try {
     // Get all feeds
-    const feedsSnapshot = await getDocs(collection(db, 'rssFeeds'));
+    const feedsSnapshot = await adminDb.collection('rssFeeds').get();
     const feeds = feedsSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -177,7 +163,7 @@ async function fixFeedUrls() {
             feedType = 'googlenews';
             newUrl = newUrl.replace('GOOGLENEWS:', '');
             // For Google News, we store the query, not a URL
-            await updateDoc(doc(db, 'rssFeeds', feed.id), {
+            await adminDb.collection('rssFeeds').doc(feed.id).update({
               url: '', // Google News doesn't use URL
               googleNewsQuery: newUrl,
               type: feedType
@@ -188,7 +174,7 @@ async function fixFeedUrls() {
           }
           
           // Update the feed
-          await updateDoc(doc(db, 'rssFeeds', feed.id), {
+          await adminDb.collection('rssFeeds').doc(feed.id).update({
             url: newUrl,
             type: feedType
           });
