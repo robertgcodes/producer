@@ -1,5 +1,5 @@
 import { adminDb } from '@/lib/firebase-admin';
-import { RSSService } from './rssService';
+import { RSSServiceServer } from './rssService.server';
 import { TwitterService } from './twitterService';
 import { YouTubeService } from './youtubeService';
 import { GoogleNewsService } from './googleNewsService';
@@ -65,7 +65,7 @@ export class FeedRefreshServiceServer {
                 case 'youtube':
                   if (feed.url) {
                     // YouTube feeds use RSS under the hood
-                    const result = await RSSService.refreshFeed(feed.id, feed.url);
+                    const result = await RSSServiceServer.refreshFeed(feed.id, feed.url);
                     feedItemCount = result.itemCount;
                   }
                   break;
@@ -73,14 +73,14 @@ export class FeedRefreshServiceServer {
                 case 'googlenews':
                   if (feed.url) {
                     // Google News feeds also use RSS
-                    const result = await RSSService.refreshFeed(feed.id, feed.url);
+                    const result = await RSSServiceServer.refreshFeed(feed.id, feed.url);
                     feedItemCount = result.itemCount;
                   }
                   break;
                   
                 case 'rss':
                 default:
-                  const result = await RSSService.refreshFeed(feed.id, feed.url);
+                  const result = await RSSServiceServer.refreshFeed(feed.id, feed.url);
                   feedItemCount = result.itemCount;
                   break;
               }
