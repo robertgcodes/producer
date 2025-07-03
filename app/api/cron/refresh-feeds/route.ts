@@ -25,18 +25,23 @@ export async function GET(request: Request) {
     });
     
     // In production, Vercel cron jobs are automatically authenticated
-    // We can optionally add extra security with a custom header check
     if (process.env.NODE_ENV === 'production') {
-      // Vercel automatically adds headers to cron requests
       const headersList = await headers();
       const isVercelCron = headersList.get('x-vercel-cron') === '1';
       
-      if (!isVercelCron) {
-        console.log('[Cron] Unauthorized request - not from Vercel cron');
+      // Allow manual testing with secret parameter
+      if (!isVercelCron && cronSecret !== process.env.CRON_SECRET) {
+        console.log('[Cron] Unauthorized request - not from Vercel cron and no valid secret');
         return NextResponse.json(
-          { error: 'Unauthorized' },
+          { error: 'Unauthorized - must be Vercel cron or provide valid secret' },
           { status: 401 }
         );
+      }
+      
+      if (isVercelCron) {
+        console.log('[Cron] Authenticated via Vercel cron header');
+      } else if (cronSecret === process.env.CRON_SECRET) {
+        console.log('[Cron] Authenticated via secret parameter (manual test)');
       }
     }
 
