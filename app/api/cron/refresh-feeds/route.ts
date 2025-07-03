@@ -27,7 +27,33 @@ export async function GET(request: Request) {
     // In production, Vercel cron jobs are automatically authenticated
     if (process.env.NODE_ENV === 'production') {
       const headersList = await headers();
-      const isVercelCron = headersList.get('x-vercel-cron') === '1';
+      
+      // Log all headers for debugging
+      const headersObject: Record<string, string> = {};
+      headersList.forEach((value, key) => {
+        if (key.toLowerCase().includes('vercel') || key.toLowerCase().includes('cron')) {
+          headersObject[key] = value;
+        }
+      });
+      console.log('[Cron] Request headers:', headersObject);
+      
+      // Check various possible header formats
+      const isVercelCron = 
+        headersList.get('x-vercel-cron') === '1' ||
+        headersList.get('X-Vercel-Cron') === '1' ||
+        headersList.get('x-vercel-signature') !== null ||
+        headersList.get('X-Vercel-Signature') !== null;
+      
+      // Also check if request is coming from Vercel's internal network
+      const host = headersList.get('host');
+      const isFromVercel = host?.includes('vercel.app') || host?.includes('vercel-internal');
+      
+      console.log('[Cron] Auth check:', {
+        isVercelCron,
+        isFromVercel,
+        hasSecret: !!cronSecret,
+        secretMatches: cronSecret === process.env.CRON_SECRET
+      });
       
       // Allow manual testing with secret parameter
       if (!isVercelCron && cronSecret !== process.env.CRON_SECRET) {
