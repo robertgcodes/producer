@@ -11,6 +11,9 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max execution time
 
+// Vercel cron jobs require specific configuration
+export const preferredRegion = 'iad1'; // Use your preferred region
+
 export async function GET(request: Request) {
   try {
     // Verify the request is from Vercel Cron
@@ -24,51 +27,47 @@ export async function GET(request: Request) {
       serviceAccountLength: process.env.FIREBASE_SERVICE_ACCOUNT_KEY?.length || 0
     });
     
-    // In production, Vercel cron jobs are automatically authenticated
+    // Authentication for Vercel cron jobs
+    const headersList = await headers();
+    
+    // Log headers for debugging
+    const headersObject: Record<string, string> = {};
+    headersList.forEach((value, key) => {
+      headersObject[key] = value;
+    });
+    
+    console.log('[Cron] All request headers:', JSON.stringify(headersObject, null, 2));
+    console.log('[Cron] Request URL:', request.url);
+    
+    // In production, check authentication
     if (process.env.NODE_ENV === 'production') {
-      const headersList = await headers();
+      // Check if this is from Vercel's cron system
+      const authorization = headersList.get('authorization');
+      const vercelCronHeader = headersList.get('x-vercel-cron');
       
-      // Log all headers for debugging
-      const headersObject: Record<string, string> = {};
-      headersList.forEach((value, key) => {
-        if (key.toLowerCase().includes('vercel') || key.toLowerCase().includes('cron')) {
-          headersObject[key] = value;
-        }
-      });
-      console.log('[Cron] Request headers:', headersObject);
-      
-      // Check various possible header formats
-      const isVercelCron = 
-        headersList.get('x-vercel-cron') === '1' ||
-        headersList.get('X-Vercel-Cron') === '1' ||
-        headersList.get('x-vercel-signature') !== null ||
-        headersList.get('X-Vercel-Signature') !== null;
-      
-      // Also check if request is coming from Vercel's internal network
-      const host = headersList.get('host');
-      const isFromVercel = host?.includes('vercel.app') || host?.includes('vercel-internal');
-      
-      console.log('[Cron] Auth check:', {
-        isVercelCron,
-        isFromVercel,
-        hasSecret: !!cronSecret,
-        secretMatches: cronSecret === process.env.CRON_SECRET
+      console.log('[Cron] Auth details:', {
+        hasAuthorization: !!authorization,
+        authValue: authorization?.substring(0, 20) + '...',
+        vercelCronHeader,
+        cronSecret: !!cronSecret,
+        hasCronSecretEnv: !!process.env.CRON_SECRET
       });
       
-      // Allow manual testing with secret parameter
-      if (!isVercelCron && cronSecret !== process.env.CRON_SECRET) {
-        console.log('[Cron] Unauthorized request - not from Vercel cron and no valid secret');
+      // Vercel sends the cron secret in the Authorization header
+      const isValidAuth = 
+        authorization === `Bearer ${process.env.CRON_SECRET}` ||
+        cronSecret === process.env.CRON_SECRET ||
+        vercelCronHeader === '1';
+      
+      if (!isValidAuth) {
+        console.log('[Cron] Unauthorized request');
         return NextResponse.json(
-          { error: 'Unauthorized - must be Vercel cron or provide valid secret' },
+          { error: 'Unauthorized' },
           { status: 401 }
         );
       }
       
-      if (isVercelCron) {
-        console.log('[Cron] Authenticated via Vercel cron header');
-      } else if (cronSecret === process.env.CRON_SECRET) {
-        console.log('[Cron] Authenticated via secret parameter (manual test)');
-      }
+      console.log('[Cron] Authorized - proceeding with feed refresh');
     }
 
     console.log('[Cron] Starting scheduled feed refresh');
