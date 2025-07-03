@@ -30,34 +30,26 @@ export async function GET(request: Request) {
     // Authentication for Vercel cron jobs
     const headersList = await headers();
     
-    // Log headers for debugging
-    const headersObject: Record<string, string> = {};
-    headersList.forEach((value, key) => {
-      headersObject[key] = value;
-    });
-    
-    console.log('[Cron] All request headers:', JSON.stringify(headersObject, null, 2));
-    console.log('[Cron] Request URL:', request.url);
-    
     // In production, check authentication
     if (process.env.NODE_ENV === 'production') {
-      // Check if this is from Vercel's cron system
-      const authorization = headersList.get('authorization');
-      const vercelCronHeader = headersList.get('x-vercel-cron');
+      // Vercel sends authentication via proxy signature for cron jobs
+      const vercelProxySignature = headersList.get('x-vercel-proxy-signature');
+      const vercelProxySignatureTs = headersList.get('x-vercel-proxy-signature-ts');
+      const vercelInternalBot = headersList.get('x-vercel-internal-bot-check');
       
-      console.log('[Cron] Auth details:', {
-        hasAuthorization: !!authorization,
-        authValue: authorization?.substring(0, 20) + '...',
-        vercelCronHeader,
-        cronSecret: !!cronSecret,
-        hasCronSecretEnv: !!process.env.CRON_SECRET
+      console.log('[Cron] Vercel authentication check:', {
+        hasProxySignature: !!vercelProxySignature,
+        hasTimestamp: !!vercelProxySignatureTs,
+        internalBot: vercelInternalBot,
+        isManualTest: !!cronSecret
       });
       
-      // Vercel sends the cron secret in the Authorization header
+      // Valid if:
+      // 1. Has Vercel proxy signature (cron job)
+      // 2. OR has valid secret in URL (manual test)
       const isValidAuth = 
-        authorization === `Bearer ${process.env.CRON_SECRET}` ||
-        cronSecret === process.env.CRON_SECRET ||
-        vercelCronHeader === '1';
+        (vercelProxySignature && vercelProxySignatureTs && vercelInternalBot === 'skip') ||
+        (cronSecret === process.env.CRON_SECRET);
       
       if (!isValidAuth) {
         console.log('[Cron] Unauthorized request');
