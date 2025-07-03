@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import { NextResponse, NextRequest } from 'next/server';
 import { FeedRefreshServiceServer } from '@/lib/services/feedRefreshService.server';
 import { BundleSearchServiceServer } from '@/lib/services/bundleSearchService.server';
 import { adminDb } from '@/lib/firebase-admin';
@@ -14,7 +13,7 @@ export const maxDuration = 300; // 5 minutes max execution time
 // Vercel cron jobs require specific configuration
 export const preferredRegion = 'iad1'; // Use your preferred region
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Verify the request is from Vercel Cron
     const { searchParams } = new URL(request.url);
@@ -27,26 +26,28 @@ export async function GET(request: Request) {
       serviceAccountLength: process.env.FIREBASE_SERVICE_ACCOUNT_KEY?.length || 0
     });
     
-    // Authentication for Vercel cron jobs
-    const headersList = await headers();
-    
     // In production, check authentication
     if (process.env.NODE_ENV === 'production') {
-      // Check if this is a Vercel cron job
-      // Vercel cron jobs send proxy signature headers
-      const vercelProxySignature = headersList.get('x-vercel-proxy-signature');
-      const vercelProxySignatureTs = headersList.get('x-vercel-proxy-signature-ts');
+      // Get headers directly from the request object
+      const vercelProxySignature = request.headers.get('x-vercel-proxy-signature');
+      const vercelProxySignatureTs = request.headers.get('x-vercel-proxy-signature-ts');
+      
+      console.log('[Cron] Auth check:', {
+        proxySignature: vercelProxySignature,
+        proxySignatureTs: vercelProxySignatureTs,
+        hasProxySignature: !!vercelProxySignature,
+        hasTimestamp: !!vercelProxySignatureTs
+      });
       
       // For Vercel cron jobs, we just need to check for the presence of these headers
       // The actual signature validation is handled by Vercel's infrastructure
       const isVercelCron = !!(vercelProxySignature && vercelProxySignatureTs);
       const isManualTest = cronSecret === process.env.CRON_SECRET;
       
-      console.log('[Cron] Auth check:', {
-        hasProxySignature: !!vercelProxySignature,
-        hasTimestamp: !!vercelProxySignatureTs,
+      console.log('[Cron] Authentication result:', {
         isVercelCron,
-        isManualTest
+        isManualTest,
+        willAuthorize: isVercelCron || isManualTest
       });
       
       if (!isVercelCron && !isManualTest) {
