@@ -32,26 +32,24 @@ export async function GET(request: Request) {
     
     // In production, check authentication
     if (process.env.NODE_ENV === 'production') {
-      // Vercel sends authentication via proxy signature for cron jobs
+      // Check if this is a Vercel cron job
+      // Vercel cron jobs send proxy signature headers
       const vercelProxySignature = headersList.get('x-vercel-proxy-signature');
       const vercelProxySignatureTs = headersList.get('x-vercel-proxy-signature-ts');
-      const vercelInternalBot = headersList.get('x-vercel-internal-bot-check');
       
-      console.log('[Cron] Vercel authentication check:', {
+      // For Vercel cron jobs, we just need to check for the presence of these headers
+      // The actual signature validation is handled by Vercel's infrastructure
+      const isVercelCron = !!(vercelProxySignature && vercelProxySignatureTs);
+      const isManualTest = cronSecret === process.env.CRON_SECRET;
+      
+      console.log('[Cron] Auth check:', {
         hasProxySignature: !!vercelProxySignature,
         hasTimestamp: !!vercelProxySignatureTs,
-        internalBot: vercelInternalBot,
-        isManualTest: !!cronSecret
+        isVercelCron,
+        isManualTest
       });
       
-      // Valid if:
-      // 1. Has Vercel proxy signature (cron job)
-      // 2. OR has valid secret in URL (manual test)
-      const isValidAuth = 
-        (vercelProxySignature && vercelProxySignatureTs && vercelInternalBot === 'skip') ||
-        (cronSecret === process.env.CRON_SECRET);
-      
-      if (!isValidAuth) {
+      if (!isVercelCron && !isManualTest) {
         console.log('[Cron] Unauthorized request');
         return NextResponse.json(
           { error: 'Unauthorized' },
