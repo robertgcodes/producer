@@ -3,9 +3,10 @@
 import { useState, useRef } from 'react';
 import { ResearchBlock, StatuteData } from '@/types';
 import { FiUpload, FiExternalLink, FiImage, FiFileText, FiRefreshCw, FiTrash2 } from 'react-icons/fi';
-import { uploadBundleFile } from '@/lib/services/fileService';
 import { AIService } from '@/lib/services/aiService';
 import { useAuth } from '@/contexts/AuthContext';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface StatuteBlockProps {
   block: ResearchBlock;
@@ -46,11 +47,16 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
 
     setUploadingPdf(true);
     try {
-      const result = await uploadBundleFile(file, 'statute-pdf', user.uid);
+      // Upload to Firebase Storage
+      const fileName = `statutes/${user.uid}/${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, fileName);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
       onUpdate(block.id, {
         subject: {
           ...statuteData,
-          pdfUrl: result.url
+          pdfUrl: downloadURL
         }
       });
     } catch (error) {
@@ -72,11 +78,16 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
 
     setUploadingThumbnail(true);
     try {
-      const result = await uploadBundleFile(file, 'statute-thumbnail', user.uid);
+      // Upload to Firebase Storage
+      const fileName = `statutes/${user.uid}/thumbnails/${Date.now()}-${file.name}`;
+      const storageRef = ref(storage, fileName);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
       onUpdate(block.id, {
         subject: {
           ...statuteData,
-          thumbnailUrl: result.url
+          thumbnailUrl: downloadURL
         }
       });
     } catch (error) {
