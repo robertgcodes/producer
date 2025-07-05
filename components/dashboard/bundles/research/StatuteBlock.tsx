@@ -26,7 +26,15 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
-  const statuteData = block.subject as StatuteData;
+  const statuteData: StatuteData = {
+    title: block.subject.title || block.subject.name || '',
+    description: block.subject.description || '',
+    statuteUrl: block.subject.statuteUrl,
+    pdfUrl: block.subject.pdfUrl,
+    thumbnailUrl: block.subject.thumbnailUrl,
+    aiSummary: block.subject.aiSummary,
+    customAnalyses: block.subject.customAnalyses
+  };
 
   const handleSave = () => {
     if (!statuteData.title?.trim()) {
@@ -55,7 +63,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
       
       onUpdate(block.id, {
         subject: {
-          ...statuteData,
+          ...block.subject,
           pdfUrl: downloadURL
         }
       });
@@ -86,7 +94,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
       
       onUpdate(block.id, {
         subject: {
-          ...statuteData,
+          ...block.subject,
           thumbnailUrl: downloadURL
         }
       });
@@ -113,7 +121,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
       
       onUpdate(block.id, {
         subject: {
-          ...statuteData,
+          ...block.subject,
           aiSummary: result
         }
       });
@@ -148,7 +156,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
 
       onUpdate(block.id, {
         subject: {
-          ...statuteData,
+          ...block.subject,
           customAnalyses
         }
       });
@@ -186,7 +194,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
               type="text"
               value={statuteData.title || ''}
               onChange={(e) => onUpdate(block.id, {
-                subject: { ...statuteData, title: e.target.value }
+                subject: { ...block.subject, title: e.target.value, name: e.target.value }
               })}
               placeholder="e.g., 18 U.S.C. § 1001"
               className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -200,7 +208,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
             <textarea
               value={statuteData.description || ''}
               onChange={(e) => onUpdate(block.id, {
-                subject: { ...statuteData, description: e.target.value }
+                subject: { ...block.subject, description: e.target.value }
               })}
               placeholder="Brief description of the statute..."
               className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
@@ -216,7 +224,7 @@ export function StatuteBlock({ block, promptTemplates, onUpdate, onDelete }: Sta
               type="url"
               value={statuteData.statuteUrl || ''}
               onChange={(e) => onUpdate(block.id, {
-                subject: { ...statuteData, statuteUrl: e.target.value }
+                subject: { ...block.subject, statuteUrl: e.target.value }
               })}
               placeholder="https://www.law.cornell.edu/..."
               className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
