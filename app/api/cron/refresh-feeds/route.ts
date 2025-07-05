@@ -131,17 +131,8 @@ export async function GET(request: NextRequest) {
           error: f.error
         }));
         
-        // Update lastRefreshed timestamps for successful feeds
-        const successfulFeedIds = feedIds.filter((id, index) => {
-          const feed = feedsToRefresh[index];
-          return !refreshResult.failedFeeds.find(f => f.title === feed.title);
-        });
-        
-        for (const feedId of successfulFeedIds) {
-          await adminDb.collection('rssFeeds').doc(feedId).update({
-            lastRefreshed: Timestamp.now()
-          });
-        }
+        // Note: The RSS service already updates lastRefreshed and lastFetched timestamps
+        // so we don't need to update them here
       } catch (error) {
         console.error('[Cron] Error during batch refresh:', error);
         results.errors.push({

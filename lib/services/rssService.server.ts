@@ -138,6 +138,7 @@ export class RSSServiceServer {
       // Update feed metadata
       await adminDb.collection('rssFeeds').doc(feedId).update({
         lastRefreshed: Timestamp.now(),
+        lastFetched: Timestamp.now(), // Update lastFetched so UI shows correct time
         itemCount: existingItemsSnapshot.size + newItemCount
       });
 
