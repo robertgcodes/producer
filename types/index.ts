@@ -114,6 +114,7 @@ export type ResearchBlockType =
   | 'criminal_defendant'
   | 'related_persons'
   | 'institution'
+  | 'statute'
   | 'custom';
 
 export interface ResearchBlockTemplate {
@@ -167,6 +168,23 @@ export interface ResearchData {
     searchQueries?: string[];
     totalSources?: number;
     confidence?: 'high' | 'medium' | 'low';
+  };
+}
+
+// Statute-specific data
+export interface StatuteData {
+  title: string;
+  description: string;
+  statuteUrl?: string;
+  pdfUrl?: string;
+  thumbnailUrl?: string;
+  aiSummary?: string;
+  customAnalyses?: {
+    [promptId: string]: {
+      prompt: string;
+      result: string;
+      timestamp: Date;
+    };
   };
 }
 

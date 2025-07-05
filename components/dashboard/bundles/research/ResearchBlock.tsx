@@ -7,6 +7,7 @@ import { Draggable } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
 import { getPromptTemplates } from '@/components/settings/PromptTemplateManager';
 import { BioResearchBlock } from './BioResearchBlock';
+import { StatuteBlock } from './StatuteBlock';
 
 interface ResearchBlockProps {
   block: ResearchBlockType;
@@ -27,6 +28,7 @@ const iconMap: Record<string, ReactElement> = {
   flag: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg>,
   'building-2': <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>,
   users: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
+  'file-text': <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
   'plus-circle': <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 };
 
@@ -43,6 +45,10 @@ export function ResearchBlock({ block, index, onUpdate, onDelete, onRegenerate }
 
   if (block.type === 'bio') {
     return <BioResearchBlock block={block} index={index} onUpdate={onUpdate} onDelete={onDelete} onRegenerate={onRegenerate} />;
+  }
+  
+  if (block.type === 'statute') {
+    return <StatuteBlock block={block} promptTemplates={promptTemplates} onUpdate={onUpdate} onDelete={onDelete} />;
   }
   
   const template = getTemplateByType(block.type);

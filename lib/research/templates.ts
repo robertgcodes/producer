@@ -238,6 +238,26 @@ Focus on verified, publicly available information with sources.`,
     ]
   },
   {
+    type: 'statute',
+    name: 'Statute',
+    description: 'Analyze legal statutes and regulations',
+    icon: 'file-text',
+    defaultPrompt: `Please provide a comprehensive legal analysis of this statute, including:
+- Key provisions and requirements
+- Scope and applicability
+- Penalties and enforcement mechanisms
+- Legislative history and intent
+- Common interpretations and case law
+- Practical implications for compliance
+- Potential defenses or exceptions
+- Related statutes and regulations`,
+    fields: [
+      { id: 'title', label: 'Statute Title', type: 'text', required: true, placeholder: 'e.g., 18 U.S.C. § 1001' },
+      { id: 'description', label: 'Description', type: 'textarea', placeholder: 'Brief description of the statute' },
+      { id: 'statuteUrl', label: 'Statute URL', type: 'text', placeholder: 'Link to full statute text' }
+    ]
+  },
+  {
     type: 'custom',
     name: 'Custom Research',
     description: 'Create a custom research block with your own parameters',
