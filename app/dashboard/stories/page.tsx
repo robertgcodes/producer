@@ -151,9 +151,9 @@ export default function StoriesPage() {
           const bSaved = savedStories.has(b.id);
           if (aSaved && !bSaved) return -1;
           if (!aSaved && bSaved) return 1;
-          const aDate = new Date(a.pubDate).getTime();
-          const bDate = new Date(b.pubDate).getTime();
-          return bDate - aDate;
+          const aSavedDate = new Date(a.pubDate).getTime();
+          const bSavedDate = new Date(b.pubDate).getTime();
+          return bSavedDate - aSavedDate;
         default:
           return 0;
       }
