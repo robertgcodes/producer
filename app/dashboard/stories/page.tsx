@@ -263,9 +263,9 @@ export default function StoriesPage() {
                       </button>
                     </div>
 
-                    {story.contentSnippet && (
+                    {story.description && (
                       <p className="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                        {story.contentSnippet}
+                        {story.description}
                       </p>
                     )}
 
@@ -294,18 +294,18 @@ export default function StoriesPage() {
                       {/* Source */}
                       <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                         <FiLink className="w-4 h-4" />
-                        <span>{new URL(story.link).hostname.replace('www.', '')}</span>
+                        <span>{story.url ? new URL(story.url).hostname.replace('www.', '') : 'Unknown'}</span>
                       </div>
 
                       {/* Date */}
                       <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                         <FiCalendar className="w-4 h-4" />
-                        <span>{formatDate(story.pubDate || story.addedAt, 'relative')}</span>
+                        <span>{formatDate(story.publishedAt || story.addedAt, 'relative')}</span>
                       </div>
 
                       {/* View Link */}
                       <a
-                        href={story.link}
+                        href={story.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ml-auto flex items-center gap-1 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
