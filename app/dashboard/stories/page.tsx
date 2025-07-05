@@ -4,12 +4,26 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
-import { ContentItem, Bundle } from '@/types';
+import { Bundle } from '@/types';
 import { FiExternalLink, FiBookmark, FiRefreshCw, FiCalendar, FiLink, FiTag } from 'react-icons/fi';
 import { formatDate } from '@/lib/utils/dateHelpers';
 import { toast } from 'sonner';
 
-interface StoryWithBundle extends ContentItem {
+interface StoryWithBundle {
+  id: string;
+  bundleId: string;
+  feedId: string;
+  feedTitle: string;
+  feedType: string;
+  itemId: string;
+  title: string;
+  link: string;
+  pubDate: string;
+  contentSnippet?: string;
+  thumbnail?: string;
+  relevanceScore: number;
+  addedAt: Date;
+  matchedTerms: string[];
   bundleTitle?: string;
   bundleIndex?: number;
 }
@@ -57,9 +71,9 @@ export default function StoriesPage() {
 
     const bundleIds = bundles.map(b => b.id);
     const storiesQuery = query(
-      collection(db, 'contentItems'),
+      collection(db, 'bundleItems'),
       where('bundleId', 'in', bundleIds),
-      orderBy('addedAt', 'desc')
+      orderBy('pubDate', 'desc')
     );
 
     const unsubscribe = onSnapshot(storiesQuery, (snapshot) => {
@@ -73,7 +87,8 @@ export default function StoriesPage() {
           ...data,
           bundleTitle: bundle?.title,
           bundleIndex,
-          addedAt: data.addedAt?.toDate() || new Date()
+          addedAt: data.addedAt?.toDate ? data.addedAt.toDate() : (data.addedAt || new Date()),
+          pubDate: data.pubDate
         } as StoryWithBundle;
       });
       
@@ -125,7 +140,10 @@ export default function StoriesPage() {
     .sort((a, b) => {
       switch (sortBy) {
         case 'recent':
-          return b.addedAt.getTime() - a.addedAt.getTime();
+          // Sort by pubDate (most recent first)
+          const aDate = new Date(a.pubDate).getTime();
+          const bDate = new Date(b.pubDate).getTime();
+          return bDate - aDate;
         case 'bundle':
           return (a.bundleTitle || '').localeCompare(b.bundleTitle || '');
         case 'saved':
@@ -133,7 +151,9 @@ export default function StoriesPage() {
           const bSaved = savedStories.has(b.id);
           if (aSaved && !bSaved) return -1;
           if (!aSaved && bSaved) return 1;
-          return b.addedAt.getTime() - a.addedAt.getTime();
+          const aDate = new Date(a.pubDate).getTime();
+          const bDate = new Date(b.pubDate).getTime();
+          return bDate - aDate;
         default:
           return 0;
       }
@@ -169,9 +189,9 @@ export default function StoriesPage() {
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
-              <FiRefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+              <FiRefreshCw className={`w-4 h-4 text-gray-700 dark:text-gray-300 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
           </div>
@@ -185,7 +205,7 @@ export default function StoriesPage() {
               <select
                 value={filterBundle}
                 onChange={(e) => setFilterBundle(e.target.value)}
-                className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
                 <option value="all">All Bundles</option>
                 <option value="saved">Saved Stories</option>
@@ -204,7 +224,7 @@ export default function StoriesPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                className="px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
               >
                 <option value="recent">Most Recent</option>
                 <option value="bundle">Bundle</option>
@@ -263,9 +283,9 @@ export default function StoriesPage() {
                       </button>
                     </div>
 
-                    {story.description && (
+                    {story.contentSnippet && (
                       <p className="text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                        {story.description}
+                        {story.contentSnippet}
                       </p>
                     )}
 
@@ -294,18 +314,18 @@ export default function StoriesPage() {
                       {/* Source */}
                       <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                         <FiLink className="w-4 h-4" />
-                        <span>{story.url ? new URL(story.url).hostname.replace('www.', '') : 'Unknown'}</span>
+                        <span>{story.link ? new URL(story.link).hostname.replace('www.', '') : story.feedTitle || 'Unknown'}</span>
                       </div>
 
                       {/* Date */}
                       <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                         <FiCalendar className="w-4 h-4" />
-                        <span>{formatDate(story.publishedAt || story.addedAt, 'relative')}</span>
+                        <span>{formatDate(new Date(story.pubDate), 'relative')}</span>
                       </div>
 
                       {/* View Link */}
                       <a
-                        href={story.url}
+                        href={story.link}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="ml-auto flex items-center gap-1 text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
