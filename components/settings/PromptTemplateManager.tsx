@@ -23,6 +23,7 @@ export function PromptTemplateManager({ onClose }: PromptTemplateManagerProps) {
     criminal_defendant: '',
     related_persons: '',
     institution: '',
+    statute: '',
     custom: ''
   });
   const [activeTab, setActiveTab] = useState<'templates' | 'defaults'>('templates');
