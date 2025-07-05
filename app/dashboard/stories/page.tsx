@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { ContentItem, Bundle } from '@/types';
 import { FiExternalLink, FiBookmark, FiRefreshCw, FiCalendar, FiLink, FiTag } from 'react-icons/fi';
 import { formatDate } from '@/lib/utils/dateHelpers';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 
 interface StoryWithBundle extends ContentItem {
   bundleTitle?: string;
-  bundleColor?: string;
+  bundleIndex?: number;
 }
 
 export default function StoriesPage() {
@@ -66,12 +66,13 @@ export default function StoriesPage() {
       const storiesData = snapshot.docs.map(doc => {
         const data = doc.data();
         const bundle = bundles.find(b => b.id === data.bundleId);
+        const bundleIndex = bundle ? bundles.indexOf(bundle) : -1;
         
         return {
           id: doc.id,
           ...data,
           bundleTitle: bundle?.title,
-          bundleColor: bundle?.color,
+          bundleIndex,
           addedAt: data.addedAt?.toDate() || new Date()
         } as StoryWithBundle;
       });
@@ -271,11 +272,20 @@ export default function StoriesPage() {
                     <div className="flex items-center gap-4 text-sm">
                       {/* Bundle Tag */}
                       <div 
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                        style={{
-                          backgroundColor: `${story.bundleColor}20`,
-                          color: story.bundleColor || '#6366f1'
-                        }}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          story.bundleIndex !== undefined && story.bundleIndex >= 0
+                            ? [
+                                'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
+                                'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400',
+                                'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400',
+                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+                                'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400',
+                                'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400',
+                                'bg-pink-100 text-pink-700 dark:bg-pink-900/20 dark:text-pink-400',
+                                'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
+                              ][story.bundleIndex % 8]
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400'
+                        }`}
                       >
                         <FiTag className="w-3 h-3" />
                         {story.bundleTitle || 'Unknown Bundle'}
